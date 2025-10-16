@@ -1,0 +1,20 @@
+levels:
+  root_dir: "sokoban_core/levels"
+  # Folders with .txt: each file may contain one or more levels (separated by an empty line)
+  sources:
+  - "examples"
+  - "boxoban/medium"
+  - "boxoban/easy"
+
+
+splits:
+  train: "sokoban_core/levels/splits/train.txt"
+  val: "sokoban_core/levels/splits/val.txt"
+  test: "sokoban_core/levels/splits/test.txt"
+
+
+filters:
+  max_width: 20
+  max_height: 20
+  min_boxes: 1
+  max_boxes: 6

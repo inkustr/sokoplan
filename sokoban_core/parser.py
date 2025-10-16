@@ -38,8 +38,8 @@ def parse_level_str(level_str: str) -> State:
     for r, line in enumerate(lines):
         for c, ch in enumerate(line):
             idx = r * width + c
-            if ch != TOK_VOID:
-                board_mask = set_bit(board_mask, idx)
+            board_mask = set_bit(board_mask, idx)
+            
             if ch == TOK_WALL:
                 walls = set_bit(walls, idx)
             elif ch == TOK_GOAL:
@@ -54,9 +54,6 @@ def parse_level_str(level_str: str) -> State:
             elif ch == TOK_PLAYER_ON_GOAL:
                 player_idx = idx
                 goals = set_bit(goals, idx)
-            else:
-                # any other — just a floor
-                pass
 
     if player_idx == -1:
         raise ValueError("No player '@' or '+' found in level")
