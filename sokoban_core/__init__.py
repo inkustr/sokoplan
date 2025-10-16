@@ -1,0 +1,1 @@
+"""Sokoban core game logic."""
