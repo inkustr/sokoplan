@@ -29,7 +29,6 @@ def main():
     r.raise_for_status()
     z = zipfile.ZipFile(io.BytesIO(r.content))
 
-    # Find subfolders medium/easy/test
     root = None
     for name in z.namelist():
         if name.endswith('/') and name.count('/') == 1 and 'boxoban-levels' in name:
@@ -45,7 +44,7 @@ def main():
         rel = name[len(root):]
         if not rel:
             continue
-        if rel.startswith(('medium/', 'easy/', 'test/')):
+        if rel.startswith(('medium/', 'hard/')):
             dest = os.path.join(args.out, rel)
             if name.endswith('/'):
                 os.makedirs(dest, exist_ok=True)
