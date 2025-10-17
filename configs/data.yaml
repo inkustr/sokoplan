@@ -4,7 +4,7 @@ levels:
   sources:
   - "examples"
   - "boxoban/medium"
-  - "boxoban/easy"
+  - "boxoban/hard"
 
 
 splits:
