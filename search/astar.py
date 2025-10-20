@@ -33,7 +33,12 @@ def astar(
     openq = PriorityQueue()
     g: Dict[State, int] = {start: 0}
     parent: Dict[State, Optional[State]] = {start: None}
-    openq.push(h_fn(start), start)
+    h0 = h_fn(start)
+    if h0 >= 10 ** 9:
+        # start is already in deadlock
+        runtime = time.time() - t0
+        return {"success": False, "nodes": 0, "runtime": runtime}
+    openq.push(h0, start)
 
     expanded = 0
     found: Optional[State] = None
@@ -58,7 +63,9 @@ def astar(
             if ns not in g or ng < g[ns]:
                 g[ns] = ng
                 parent[ns] = s
-                openq.push(ng + h_fn(ns), ns)
+                hn = h_fn(ns)
+                if hn < 10 ** 9:
+                    openq.push(ng + hn, ns)
 
     runtime = time.time() - t0
     if found is None:

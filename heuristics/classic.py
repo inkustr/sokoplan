@@ -1,12 +1,10 @@
 from __future__ import annotations
 from typing import List, Tuple, Callable
-import math
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from sokoban_core.state import State
-from sokoban_core.moves import iter_bits, has_simple_deadlock
-
+from sokoban_core.deadlocks import deadlock_penalty
 
 # ---- helpers
 
@@ -58,6 +56,5 @@ def h_manhattan_hungarian(state: State) -> int:
 
 
 def h_with_deadlocks(state: State, base_h: Callable[[State], int] = h_manhattan_hungarian) -> int:
-    if has_simple_deadlock(state):
-        return 10 ** 9  # huge penalty → A* won't go here
-    return base_h(state)
+    return deadlock_penalty(state, base_h(state))
+
