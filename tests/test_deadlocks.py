@@ -26,7 +26,7 @@ def test_corridor_line_deadlock():
     # Vertical corridor without goals on the line of the box
     lvl = """
 ######
-# ####
+#.####
 # $  #
 # ####
 #  @ #
