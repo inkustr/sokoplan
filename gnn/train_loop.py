@@ -3,6 +3,7 @@ import os, math
 import torch
 from torch.utils.data import random_split
 from torch_geometric.loader import DataLoader
+from tqdm import tqdm
 
 from gnn.dataset import JsonlSokobanDataset
 from gnn.model import GINHeuristic
@@ -13,7 +14,7 @@ def train_once(model, loader, opt, device):
     model.train()
     total = 0.0
     n = 0
-    for batch in loader:
+    for batch in tqdm(loader, desc="Train", leave=False):
         batch = batch.to(device)
         pred = model(batch.x, batch.edge_index, batch.batch)
         loss = huber_loss(pred, batch.y.view(-1))
@@ -28,7 +29,7 @@ def eval_once(model, loader, device):
     total = 0.0
     n = 0
     with torch.no_grad():
-        for batch in loader:
+        for batch in tqdm(loader, desc="Val", leave=False):
             batch = batch.to(device)
             pred = model(batch.x, batch.edge_index, batch.batch)
             loss = huber_loss(pred, batch.y.view(-1))

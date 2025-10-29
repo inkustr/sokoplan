@@ -3,3 +3,5 @@ __pycache__/
 sokoban_core/levels/boxoban/
 sokoban_core/levels/splits/
 /results/
+/artifacts/
+/data/

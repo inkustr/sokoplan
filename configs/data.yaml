@@ -3,7 +3,7 @@ levels:
   # Folders with .txt: each file may contain one or more levels (separated by an empty line)
   sources:
   - "examples"
-  - "boxoban/medium"
+  - "boxoban/medium/train"
   - "boxoban/hard"
 
 

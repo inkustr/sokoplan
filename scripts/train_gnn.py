@@ -2,6 +2,7 @@ from __future__ import annotations
 import argparse, os, json
 import torch
 from torch_geometric.loader import DataLoader
+from tqdm import tqdm
 from gnn.dataset import JsonlSokobanDataset
 from gnn.model import GINHeuristic
 from gnn.train_loop import train_once, eval_once
@@ -41,10 +42,10 @@ def main():
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr)
 
     best = float('inf')
-    for epoch in range(1, args.epochs+1):
+    for epoch in tqdm(range(1, args.epochs+1), desc="Training", unit="epoch"):
         tr = train_once(model, dl_train, opt, device)
         va = eval_once(model, dl_val, device)
-        print(f"epoch {epoch:03d} | train {tr:.4f} | val {va:.4f}")
+        tqdm.write(f"epoch {epoch:03d} | train {tr:.4f} | val {va:.4f}")
         if va < best:
             best = va
             torch.save({
