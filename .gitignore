@@ -1,7 +1,6 @@
 .venv/
 __pycache__/
-sokoban_core/levels/boxoban/
-sokoban_core/levels/splits/
+sokoban_core/levels/
 /results/
 /artifacts/
 /data/
