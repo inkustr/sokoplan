@@ -67,10 +67,18 @@ def main():
     p.add_argument("--time_limit", type=float, default=15.0)
     p.add_argument("--node_limit", type=int, default=300000)
     p.add_argument("--jobs", type=int, default=0, help="processes (0→cpu_count)")
+    p.add_argument("--shard_idx", type=int, default=0, help="index of this shard (0..num_shards-1)")
+    p.add_argument("--num_shards", type=int, default=1, help="total number of shards")
     args = p.parse_args()
 
     with open(args.list, "r", encoding="utf-8") as f:
         level_ids = [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
+
+    if args.num_shards > 1:
+        # Simple deterministic slicing
+        # level_ids[i] belongs to shard k if i % num_shards == k
+        level_ids = [lid for i, lid in enumerate(level_ids) if i % args.num_shards == args.shard_idx]
+        print(f"[Shard {args.shard_idx}/{args.num_shards}] Processing {len(level_ids)} levels")
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
 
