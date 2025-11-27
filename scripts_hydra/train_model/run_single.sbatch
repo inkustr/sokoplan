@@ -5,10 +5,10 @@
 #SBATCH --time=2-00:00:00
 #SBATCH --partition=gpu-2d
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=32G
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
 #SBATCH --gpus-per-node=1
-#SBATCH --constraint="80gb|40gb"
+#SBATCH --constraint="80gb"
 
 mkdir -p logs
 mkdir -p artifacts
@@ -27,9 +27,10 @@ echo "Python: $(which python3)"
 
 # Training parameters
 TRAIN_DATA="data/labels.jsonl"
-OUTPUT_MODEL="artifacts/gnn_best.pt"
-EPOCHS=10
-BATCH=128
+OUTPUT_MODEL="artifacts/gnn_best_${SLURM_JOB_ID}.pt"
+CHECKPOINT="artifacts/gnn_checkpoint_${SLURM_JOB_ID}.pt"
+EPOCHS=4
+BATCH=512 
 HIDDEN=128
 LAYERS=4
 LR=1e-3
@@ -57,7 +58,7 @@ python3 -m scripts.train_gnn \
     --layers $LAYERS \
     --lr $LR \
     --out "$OUTPUT_MODEL" \
-    --checkpoint "artifacts/gnn_checkpoint.pt" \
+    --checkpoint "$CHECKPOINT" \
     --resume
 
 echo "Training finished. Model saved to $OUTPUT_MODEL"
