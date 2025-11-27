@@ -33,7 +33,7 @@ def state_to_dict(s) -> Dict[str, int]:
 
 def _process_one_level(args_tuple) -> List[Dict]:
     """Process one level and return list of (state, y) records."""
-    level_id, heur_name, use_dl, time_limit, node_limit = args_tuple
+    level_id, heur_name, use_dl, time_limit, node_limit, sample_every = args_tuple
     try:
         s0 = load_level_by_id(level_id)
         zob = Zobrist(s0.width, s0.height, s0.board_mask)
@@ -48,11 +48,12 @@ def _process_one_level(args_tuple) -> List[Dict]:
         T = len(path) - 1
         records = []
         for t, st in enumerate(path):
-            y = T - t
-            rec = state_to_dict(st)
-            rec["y"] = int(y)
-            rec["level_id"] = level_id
-            records.append(rec)
+            if t % sample_every == 0 or t == 0 or t == T:
+                y = T - t
+                rec = state_to_dict(st)
+                rec["y"] = int(y)
+                rec["level_id"] = level_id
+                records.append(rec)
         return records
     except Exception:
         return []
@@ -69,6 +70,7 @@ def main():
     p.add_argument("--jobs", type=int, default=0, help="processes (0→cpu_count)")
     p.add_argument("--shard_idx", type=int, default=0, help="index of this shard (0..num_shards-1)")
     p.add_argument("--num_shards", type=int, default=1, help="total number of shards")
+    p.add_argument("--sample_every", type=int, default=1, help="sample every Nth state from path (1=all, 2=every 2nd, 3=every 3rd)")
     args = p.parse_args()
 
     with open(args.list, "r", encoding="utf-8") as f:
@@ -83,7 +85,7 @@ def main():
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
 
     jobs = args.jobs or cpu_count()
-    payload = [(lid, args.h, args.use_dl, args.time_limit, args.node_limit) for lid in level_ids]
+    payload = [(lid, args.h, args.use_dl, args.time_limit, args.node_limit, args.sample_every) for lid in level_ids]
 
     # Process levels in parallel
     if jobs == 1:
