@@ -19,13 +19,20 @@ def main():
     p.add_argument("--lr", type=float, default=1e-3)
     p.add_argument("--dropout", type=float, default=0.0)
     p.add_argument("--out", default="artifacts/gnn_best.pt")
+    p.add_argument("--checkpoint", default="artifacts/gnn_checkpoint.pt", help="checkpoint file for resuming")
+    p.add_argument("--resume", action="store_true", help="resume from checkpoint if exists")
     args = p.parse_args()
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"[INFO] Using device: {device}")
+    if torch.cuda.is_available():
+        print(f"[INFO] GPU: {torch.cuda.get_device_name(0)}")
+        print(f"[INFO] GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
 
     ds_train = JsonlSokobanDataset(args.train)
+    print(f"[INFO] Training dataset size: {len(ds_train)} samples")
     if args.val:
         ds_val = JsonlSokobanDataset(args.val)
     else:
@@ -41,17 +48,42 @@ def main():
     model = GINHeuristic(in_dim=4, hidden=args.hidden, layers=args.layers, dropout=args.dropout).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr)
 
+    # Resume from checkpoint if requested
+    start_epoch = 1
     best = float('inf')
-    for epoch in tqdm(range(1, args.epochs+1), desc="Training", unit="epoch"):
+    if args.resume and os.path.exists(args.checkpoint):
+        print(f"Resuming from checkpoint: {args.checkpoint}")
+        ckpt = torch.load(args.checkpoint, map_location=device)
+        model.load_state_dict(ckpt['model_state_dict'])
+        opt.load_state_dict(ckpt['optimizer_state_dict'])
+        start_epoch = ckpt['epoch'] + 1
+        best = ckpt.get('best_val_loss', float('inf'))
+        print(f"Resuming from epoch {start_epoch}, best val loss: {best:.4f}")
+
+    for epoch in tqdm(range(start_epoch, args.epochs+1), desc="Training", unit="epoch"):
         tr = train_once(model, dl_train, opt, device)
         va = eval_once(model, dl_val, device)
         tqdm.write(f"epoch {epoch:03d} | train {tr:.4f} | val {va:.4f}")
+        
+        # Save checkpoint every epoch
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': opt.state_dict(),
+            'config': vars(args),
+            'train_loss': tr,
+            'val_loss': va,
+            'best_val_loss': best,
+        }, args.checkpoint)
+        
+        # Save best model
         if va < best:
             best = va
             torch.save({
                 'model_state_dict': model.state_dict(),
                 'config': vars(args),
                 'val_loss': va,
+                'epoch': epoch,
             }, args.out)
     print(f"saved best → {args.out} (val={best:.4f})")
 
