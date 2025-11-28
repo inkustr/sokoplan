@@ -29,7 +29,10 @@ def _run_one(args_tuple) -> Dict[str, object]:
             "runtime": float(res.get("runtime", 0.0)),
             "solution_len": int(res.get("solution_len", -1)),
         }
-    except Exception:
+    except Exception as e:
+        print(f"ERROR on {level_id}: {e}")
+        import traceback
+        traceback.print_exc()
         return {"level_id": level_id, "heuristic": f"gnn[{mode}]", "success": False, "nodes": 0, "runtime": 0.0, "solution_len": -1}
 
 
@@ -40,10 +43,14 @@ def main():
     p.add_argument("--mode", default="optimal_mix", choices=["optimal_mix", "speed"])
     p.add_argument("--no_dl", action="store_true", help="disable deadlock filter")
     p.add_argument("--out", default="results/batch_gnn.csv")
-    p.add_argument("--time_limit", type=float, default=20.0)
-    p.add_argument("--node_limit", type=int, default=200000)
+    p.add_argument("--time_limit", type=float, default=200.0)
+    p.add_argument("--node_limit", type=int, default=2000000)
     p.add_argument("--jobs", type=int, default=0, help="processes (0→cpu_count)")
     args = p.parse_args()
+
+    if not os.path.exists(args.ckpt):
+        print(f"ERROR: Checkpoint file not found: {args.ckpt}")
+        exit(1)
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
 
