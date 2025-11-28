@@ -24,7 +24,6 @@ class Zobrist:
 
     def hash(self, s: State) -> int:
         h = 0
-        h ^= self.player_keys[s.player]
         boxes = s.boxes
         idx = 0
         while boxes:
