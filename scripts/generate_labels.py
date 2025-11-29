@@ -87,20 +87,20 @@ def main():
     jobs = args.jobs or cpu_count()
     payload = [(lid, args.h, args.use_dl, args.time_limit, args.node_limit, args.sample_every) for lid in level_ids]
 
-    # Process levels in parallel
-    if jobs == 1:
-        all_records = [_process_one_level(t) for t in tqdm(payload, desc="Processing levels", unit="level")]
-    else:
-        with Pool(processes=jobs) as pool:
-            all_records = list(tqdm(pool.imap_unordered(_process_one_level, payload), total=len(payload), desc="Processing levels", unit="level"))
-
-    # Write all records to output file
     count_pairs = 0
     with open(args.out, "w", encoding="utf-8") as out:
-        for records in all_records:
-            for rec in records:
-                out.write(json.dumps(rec) + "\n")
-                count_pairs += 1
+        if jobs == 1:
+            for task in tqdm(payload, desc="Processing levels", unit="level"):
+                records = _process_one_level(task)
+                for rec in records:
+                    out.write(json.dumps(rec) + "\n")
+                    count_pairs += 1
+        else:
+            with Pool(processes=jobs) as pool:
+                for records in tqdm(pool.imap_unordered(_process_one_level, payload), total=len(payload), desc="Processing levels", unit="level"):
+                    for rec in records:
+                        out.write(json.dumps(rec) + "\n")
+                        count_pairs += 1
     
     print(f"wrote {count_pairs} (state, y) pairs → {args.out}; jobs={jobs}")
 
