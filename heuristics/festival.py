@@ -46,7 +46,7 @@ def festival_heuristic(level_str: str, timeout: int = 300) -> Optional[Tuple[Lis
         env['FESTIVAL_DISABLE_INTERACTIVE'] = '1'
         
         result = subprocess.run(
-            [festival_bin, temp_file, '-out_dir', temp_dir, '-cores', '1'],
+            [festival_bin, temp_file, '-out_dir', temp_dir, '-cores', '1', '-time', str(timeout)],
             capture_output=True,
             timeout=timeout,
             text=True,
