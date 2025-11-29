@@ -174,35 +174,6 @@ def is_2x2_deadlock(state: State, box_idx: int) -> bool:
     return False
 
 
-def is_freeze_deadlock(state: State, box_idx: int) -> bool:
-    """Check if a box is frozen.
-    
-    A box is frozen if it's blocked both horizontally AND vertically by walls/boxes.
-    If the box is on a goal, it's not a deadlock.
-    """
-    if state.is_goal_cell(box_idx):
-        return False
-    
-    w = state.width
-    h = state.height
-    size = w * h
-    
-    up = box_idx - w if box_idx >= w else -1
-    down = box_idx + w if box_idx + w < size else -1
-    left = box_idx - 1 if box_idx % w != 0 else -1
-    right = box_idx + 1 if box_idx % w != w - 1 else -1
-    
-    def is_blocked(idx: int) -> bool:
-        if idx == -1:
-            return True
-        return _is_wall_like(state, idx) or state.has_box(idx)
-        
-    h_frozen = is_blocked(left) and is_blocked(right)
-    
-    v_frozen = is_blocked(up) and is_blocked(down)
-    return h_frozen and v_frozen
-
-
 # --- combined API ------------------------------------------------------------
 
 def has_deadlock(state: State) -> bool:
@@ -219,8 +190,7 @@ def has_deadlock(state: State) -> bool:
             continue
         if is_corner_deadlock(state, b) or \
            is_corridor_line_deadlock(state, b) or \
-           is_2x2_deadlock(state, b) or \
-           is_freeze_deadlock(state, b):
+           is_2x2_deadlock(state, b):
             deadlocked = True
             break
 
