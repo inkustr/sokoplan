@@ -21,9 +21,14 @@ def main():
     p.add_argument("--out", default="artifacts/gnn_best.pt")
     p.add_argument("--checkpoint", default="artifacts/gnn_checkpoint.pt", help="checkpoint file for resuming")
     p.add_argument("--resume", action="store_true", help="resume from checkpoint if exists")
+    p.add_argument("--temp_folder", required=False, help="folder to save epoch models")
     args = p.parse_args()
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
+
+    if args.temp_folder:
+        os.makedirs(args.temp_folder, exist_ok=True)
+        print(f"[INFO] Epoch models will be saved to: {args.temp_folder}")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"[INFO] Using device: {device}")
@@ -85,6 +90,17 @@ def main():
                 'val_loss': va,
                 'epoch': epoch,
             }, args.out)
+        
+        if args.temp_folder:
+            epoch_path = os.path.join(args.temp_folder, f"epoch_{epoch:03d}.pt")
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'config': vars(args),
+                'train_loss': tr,
+                'val_loss': va,
+                'epoch': epoch,
+            }, epoch_path)
+    
     print(f"saved best → {args.out} (val={best:.4f})")
 
 
