@@ -31,5 +31,6 @@ class Zobrist:
                 h ^= self.box_keys[idx]
             boxes >>= 1
             idx += 1
+        h ^= self.player_keys[s.player]
         return h
 
