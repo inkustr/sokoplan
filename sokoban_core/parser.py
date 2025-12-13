@@ -23,7 +23,11 @@ def parse_level_str(level_str: str) -> State:
       ' ' (space): void/outside the level
     Other characters are treated as floor (nothing).
     """
-    lines = [line.rstrip("\n") for line in level_str.splitlines() if line.strip() != ""]
+    lines = [
+        line.rstrip("\n")
+        for line in level_str.splitlines()
+        if line.strip() != "" and not line.lstrip().startswith(";")
+    ]
     if not lines:
         raise ValueError("Empty level")
     height = len(lines)
