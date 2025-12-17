@@ -16,7 +16,7 @@ Example usage:
   source .venv/bin/activate
   python -m scripts.blocks.utils.filter_packs \
     --config configs/data.yaml \
-    --windows_subdir windows \
+    --pack_subdir windows \
     --out_dir sokoban_core/levels/packs_filtered
 """
 
@@ -41,7 +41,7 @@ def _strip_comment_lines(level_str: str) -> str:
     return "\n".join(lines)
 
 
-def _count_boxes_goals(level_str: str) -> Tuple[int, int]:
+def _boxes_goals_match(level_str: str) -> bool:
     s = parse_level_str(level_str)
     return int(s.boxes.bit_count()), int(s.goals.bit_count())
 
@@ -78,23 +78,23 @@ def _write_list(list_path: str, pack_txt_path: str, n: int) -> None:
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--config", default="configs/data.yaml")
-    p.add_argument("--windows_subdir", default="windows")
+    p.add_argument("--pack_subdir", default="windows")
     p.add_argument("--out_dir", default="sokoban_core/levels/packs_filtered")
     args = p.parse_args()
 
     root_dir, flt = _read_filters(args.config)
 
-    windows_root = os.path.join(root_dir, args.windows_subdir)
-    if not os.path.isdir(windows_root):
-        raise SystemExit(f"windows dir not found: {windows_root}")
+    pack_root = os.path.join(root_dir, args.pack_subdir)
+    if not os.path.isdir(pack_root):
+        raise SystemExit(f"pack dir not found: {pack_root}")
 
     pack_dirs = [
-        os.path.join(args.windows_subdir, d)
-        for d in sorted(os.listdir(windows_root))
-        if os.path.isdir(os.path.join(windows_root, d))
+        os.path.join(args.pack_subdir, d)
+        for d in sorted(os.listdir(pack_root))
+        if os.path.isdir(os.path.join(pack_root, d))
     ]
     if not pack_dirs:
-        raise SystemExit(f"No pack directories under {windows_root}")
+        raise SystemExit(f"No pack directories under {pack_root}")
 
     out_lists_dir = os.path.join(args.out_dir, "lists")
     os.makedirs(args.out_dir, exist_ok=True)
@@ -123,17 +123,10 @@ def main() -> None:
             ):
                 continue
 
-            try:
-                nb, ng = _count_boxes_goals(lvl)
-            except Exception:
-                continue
-            if nb != ng:
+            if not _boxes_goals_match(lvl):
                 continue
 
             valid_levels.append(lvl)
-
-        if len(seen_files) > 1:
-            print(f"[WARN] pack '{pack_name}' has multiple .txt files ({len(seen_files)}). Using all of them.")
 
         if not valid_levels:
             continue
@@ -150,7 +143,6 @@ def main() -> None:
     print(f"packs_written: {packs_written}")
     print(f"levels_in: {total_in}")
     print(f"levels_out: {total_out}")
-    print(f"out_dir: {args.out_dir}")
 
 
 if __name__ == "__main__":
