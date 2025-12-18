@@ -28,9 +28,37 @@ class GNNHeuristic:
         use_deadlocks: bool = True,
     ) -> None:
         self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
-        self.model = GINHeuristic(in_dim=4)
         obj = torch.load(ckpt_path, map_location=self.device)
-        self.model.load_state_dict(obj['model_state_dict'])
+
+        # Robust checkpoint loading: different trainings may use different depths (layers) / hidden sizes.
+        sd = obj.get("model_state_dict", obj)
+        if not isinstance(sd, dict):
+            raise RuntimeError(f"Invalid checkpoint format at {ckpt_path}: expected dict-like state_dict.")
+
+        # Infer conv depth from keys like "convs.<i>...."
+        max_conv_idx = -1
+        for k in sd.keys():
+            if not isinstance(k, str) or not k.startswith("convs."):
+                continue
+            parts = k.split(".")
+            if len(parts) < 2:
+                continue
+            try:
+                idx = int(parts[1])
+            except Exception:
+                continue
+            if idx > max_conv_idx:
+                max_conv_idx = idx
+        layers = (max_conv_idx + 1) if max_conv_idx >= 0 else 4
+
+        # Infer hidden size from "convs.0.nn.net.0.weight": shape [hidden, in_dim]
+        hidden = 128
+        w0 = sd.get("convs.0.nn.net.0.weight")
+        if isinstance(w0, torch.Tensor) and w0.ndim == 2 and w0.shape[0] > 0:
+            hidden = int(w0.shape[0])
+
+        self.model = GINHeuristic(in_dim=4, hidden=hidden, layers=layers)
+        self.model.load_state_dict(sd)
         self.model.eval().to(self.device)
 
         try:
@@ -50,6 +78,7 @@ class GNNHeuristic:
         # Cache static graph structure (reused across all states in a level)
         self._edge_index: Optional[torch.Tensor] = None
         self._floor_mask: Optional[List[int]] = None
+        self._idx2nid: Optional[List[int]] = None  # cell_idx -> node_id (or -1)
         self._static_features: Optional[torch.Tensor] = None  # [is_goal, walls_around]
         self._board_signature: Optional[Tuple[int, int, int]] = None  # (width, height, board_mask)
         
@@ -63,8 +92,8 @@ class GNNHeuristic:
         size = W * H
         
         # Select floor cells (inside & not wall)
-        floor_mask = []
-        idx2nid: Dict[int, int] = {}
+        floor_mask: List[int] = []
+        idx2nid: List[int] = [-1] * size
         nid = 0
         for idx in range(size):
             inside = s.is_inside(idx)
@@ -83,9 +112,10 @@ class GNNHeuristic:
                 rr, cc = r+dr, c+dc
                 if 0 <= rr < H and 0 <= cc < W:
                     j = rr * W + cc
-                    if j in idx2nid:
+                    nj = idx2nid[j]
+                    if nj >= 0:
                         src.append(idx2nid[idx])
-                        dst.append(idx2nid[j])
+                        dst.append(nj)
         edge_index = torch.tensor([src, dst], dtype=torch.long, device=self.device)
         
         # Build static features (goal, walls_around)
@@ -107,6 +137,7 @@ class GNNHeuristic:
         
         self._edge_index = edge_index
         self._floor_mask = floor_mask
+        self._idx2nid = idx2nid
         self._static_features = torch.tensor(static_feats, dtype=torch.float, device=self.device)
         self._board_signature = (s.width, s.height, int(s.board_mask))
     
@@ -129,6 +160,11 @@ class GNNHeuristic:
             self._feature_buffer = None
             self._batch_buffer = None
 
+        assert self._floor_mask is not None
+        assert self._idx2nid is not None
+        assert self._static_features is not None
+        assert self._edge_index is not None
+
         n = len(self._floor_mask)
         if self._feature_buffer is None or self._feature_buffer.shape[0] != n:
             self._feature_buffer = torch.zeros((n, 4), dtype=torch.float, device=self.device)
@@ -138,11 +174,19 @@ class GNNHeuristic:
         
         self._feature_buffer[:, 1].zero_()
         self._feature_buffer[:, 2].zero_()
-        for i, idx in enumerate(self._floor_mask):
-            if s.has_box(idx):
-                self._feature_buffer[i, 1] = 1.0
-            if idx == s.player:
-                self._feature_buffer[i, 2] = 1.0
+
+        boxes = int(s.boxes)
+        while boxes:
+            lsb = boxes & -boxes
+            idx = lsb.bit_length() - 1
+            nid = self._idx2nid[idx]
+            if nid >= 0:
+                self._feature_buffer[nid, 1] = 1.0
+            boxes ^= lsb
+
+        pnid = self._idx2nid[int(s.player)]
+        if pnid >= 0:
+            self._feature_buffer[pnid, 2] = 1.0
         
         with torch.no_grad():
             y_hat = self.model(self._feature_buffer, self._edge_index, self._batch_buffer)
