@@ -4,3 +4,5 @@ sokoban_core/levels/
 /results/
 /artifacts/
 /data/
+*.DS_Store
+__old_labels/

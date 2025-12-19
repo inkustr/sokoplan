@@ -38,7 +38,7 @@ def astar(
         # start is already in deadlock
         runtime = time.time() - t0
         return {"success": False, "nodes": 0, "runtime": runtime}
-    openq.push(h0, start)
+    openq.push(h0, (0, start))
 
     expanded = 0
     found: Optional[State] = None
@@ -46,7 +46,10 @@ def astar(
     while len(openq) > 0:
         if time_limit_s is not None and (time.time() - t0) > time_limit_s:
             break
-        s: State = openq.pop()
+        gs_from_q, s = openq.pop()
+
+        if gs_from_q != g.get(s, gs_from_q):
+            continue
         if is_goal_fn(s):
             found = s
             break
@@ -65,7 +68,7 @@ def astar(
                 parent[ns] = s
                 hn = h_fn(ns)
                 if hn < 10 ** 9:
-                    openq.push(ng + hn, ns)
+                    openq.push(ng + hn, (ng, ns))
 
     runtime = time.time() - t0
     if found is None:
