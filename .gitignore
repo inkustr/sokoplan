@@ -6,3 +6,5 @@ sokoban_core/levels/
 /data/
 *.DS_Store
 __old_labels/
+festival/*.o
+festival/festival
