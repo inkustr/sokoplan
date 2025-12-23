@@ -5,8 +5,8 @@
 #SBATCH --time=2-00:00:00
 #SBATCH --partition=cpu-2d
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=32G
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=128G
 #SBATCH --array=0-49
 
 set -euo pipefail
@@ -23,7 +23,7 @@ PACKS_DIR="${PACKS_DIR:-sokoban_core/levels/packs_filtered}"
 LISTS_DIR="${PACKS_DIR}/lists"
 OUT_DIR="${OUT_DIR:-data/packs_labels_festival}"
 TIME_LIMIT="${TIME_LIMIT:-3600}"
-JOBS="${JOBS:-8}"
+JOBS="${JOBS:-0}"
 SAMPLE_EVERY="${SAMPLE_EVERY:-3}"
 NUM_SHARDS="${NUM_SHARDS:-50}"
 SHARD_IDX="${SLURM_ARRAY_TASK_ID}"
@@ -40,17 +40,62 @@ echo "Shard: ${SHARD_IDX}/${NUM_SHARDS}"
 mkdir -p "$OUT_DIR"
 
 count=0
-for i in "${!LIST_FILES[@]}"; do
-  if [ $(( i % NUM_SHARDS )) -ne "$SHARD_IDX" ]; then
-    continue
-  fi
+export LISTS_DIR
+export NUM_SHARDS
+export SHARD_IDX
 
-  LIST_PATH="${LIST_FILES[$i]}"
+ASSIGNED_LISTS=($(
+python3 - <<'PY'
+import os, sys, subprocess
+
+lists_dir = os.environ["LISTS_DIR"]
+num_shards = int(os.environ.get("NUM_SHARDS", "50"))
+shard_idx = int(os.environ.get("SHARD_IDX", "0"))
+if shard_idx < 0 or shard_idx >= num_shards:
+    sys.exit(0)
+
+files = sorted([os.path.join(lists_dir, f) for f in os.listdir(lists_dir) if f.endswith(".list")])
+if not files:
+    sys.exit(0)
+
+def count_lines(p: str) -> int:
+    # Use wc -l (fast) and fallback to python
+    try:
+        out = subprocess.check_output(["wc", "-l", p], text=True).strip().split()
+        return int(out[0])
+    except Exception:
+        n = 0
+        with open(p, "r", encoding="utf-8") as f:
+            for ln in f:
+                ln = ln.strip()
+                if ln and not ln.startswith("#"):
+                    n += 1
+        return n
+
+weights = [(count_lines(p), p) for p in files]
+weights.sort(reverse=True)  # largest first
+
+bins = [(0, []) for _ in range(num_shards)]  # (total_weight, [paths])
+for w, p in weights:
+    i = min(range(num_shards), key=lambda k: bins[k][0])
+    bins[i][1].append(p)
+    bins[i] = (bins[i][0] + w, bins[i][1])
+
+assigned = bins[shard_idx][1]
+for p in assigned:
+    print(p)
+PY
+))
+
+echo "Assigned pack lists to this shard: ${#ASSIGNED_LISTS[@]}"
+
+for LIST_PATH in "${ASSIGNED_LISTS[@]}"; do
   BASE="$(basename "$LIST_PATH" .list)"
   OUT_PATH="${OUT_DIR}/${BASE}.jsonl"
 
+  idx=$((count + 1))
   echo "================================================"
-  echo "Pack idx: $i"
+  echo "Pack   : ${idx}/${#ASSIGNED_LISTS[@]}"
   echo "List   : $LIST_PATH"
   echo "Out    : $OUT_PATH"
   echo "================================================"
