@@ -27,7 +27,12 @@ void compute_match_distance(board b,
 	boxes_num   = get_indices_of_boxes(b, boxes_indices);
 	targets_num = get_indices_of_targets(b, targets_indices);
 
-	if (boxes_num != targets_num) exit_with_error("box num mismatch1");
+	if (boxes_num != targets_num)
+	{
+		printf("box num mismatch1 boxes=%d targets=%d\n", boxes_num, targets_num);
+		print_board(b);
+		exit_with_error("box num mismatch1");
+	}
 
 	for (i = 0; i < boxes_num; i++)
 		for (j = 0; j < targets_num; j++)
@@ -102,7 +107,11 @@ void compute_imagine_distance(board b,
 	targets_num = get_indices_of_boxes(imagined, targets_indices);
 
 	if (boxes_num != targets_num)
+	{
+		printf("box num mismatch2 boxes=%d targets=%d\n", boxes_num, targets_num);
+		print_board(b);
 		exit_with_error("box num mismatch2");
+	}
 
 	for (i = 0; i < boxes_num; i++)
 	{
@@ -184,7 +193,12 @@ void compute_base_distance(board b,
 	boxes_num = get_indices_of_boxes(b, boxes_indices);
 	bases_num = get_indices_of_initial_bases(b, bases_indices);
 
-	if (boxes_num != bases_num) exit_with_error("box num mismatch3");
+	if (boxes_num != bases_num)
+	{
+		printf("box num mismatch3 boxes=%d bases=%d\n", boxes_num, bases_num);
+		print_board(b);
+		exit_with_error("box num mismatch3");
+	}
 
 	for (i = 0; i < boxes_num; i++)
 		for (j = 0; j < bases_num; j++)
@@ -257,7 +271,12 @@ void compute_rev_distance(board b,
 	boxes_num = get_indices_of_boxes(b, boxes_indices);
 	bases_num = get_indices_of_boxes(base_board, bases_indices);
 
-	if (boxes_num != bases_num) exit_with_error("box num mismatch4");
+	if (boxes_num != bases_num)
+	{
+		printf("box num mismatch4 boxes=%d bases=%d\n", boxes_num, bases_num);
+		print_board(b);
+		exit_with_error("box num mismatch4");
+	}
 
 	for (i = 0; i < boxes_num; i++)
 		for (j = 0; j < bases_num; j++)

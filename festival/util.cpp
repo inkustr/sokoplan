@@ -159,7 +159,10 @@ char linux_getch(void)
     struct termios old = {0};
     fflush(stdout);
     if(tcgetattr(0, &old) < 0)
-        perror("tcsetattr()");
+    {
+        perror("tcgetattr()");
+        return 0;
+    }
     old.c_lflag &= ~ICANON;
     old.c_lflag &= ~ECHO;
     old.c_cc[VMIN] = 1;

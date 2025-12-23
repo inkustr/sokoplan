@@ -129,69 +129,86 @@ void turn_decorative_boxes_to_walls(board b)
 	board c;
 	int i, j, k;
 	int changed = 1;
+	int boxes_num = 0;
+	int targets_num = 0;
 
 	remove_boxes_out_of_inner(b);
+
+	for (i = 0; i < height; i++)
+		for (j = 0; j < width; j++)
+		{
+			if (b[i][j] & BOX) boxes_num++;
+			if (b[i][j] & TARGET) targets_num++;
+		}
+
+	if (boxes_num == targets_num)
+		return;
 
 	clear_boxes(b, c);
 
 	// eliminate pullable boxes
-
-	for (i = 0; i < height; i++)
-		for (j = 0; j < width; j++)
-			if (c[i][j] & TARGET)
-				c[i][j] = BOX;
-
-	while (changed)
+	if (targets_num > boxes_num)
 	{
-		changed = 0;
+		for (i = 0; i < height; i++)
+			for (j = 0; j < width; j++)
+				if (c[i][j] & TARGET)
+					c[i][j] = BOX;
+
+		while (changed)
+		{
+			changed = 0;
+
+			for (i = 0; i < height; i++)
+				for (j = 0; j < width; j++)
+				{
+					if ((c[i][j] & BOX) == 0) continue;
+					for (k = 0; k < 4; k++)
+					{
+						if (c[i + delta_y[k]][j + delta_x[k]] & OCCUPIED) continue;
+						if (c[i + delta_y[k] * 2][j + delta_x[k] * 2] & OCCUPIED) continue;
+
+						c[i][j] &= ~BOX;
+						changed = 1;
+					}
+				}
+		}
 
 		for (i = 0; i < height; i++)
 			for (j = 0; j < width; j++)
-			{
-				if ((c[i][j] & BOX) == 0) continue;
-				for (k = 0; k < 4; k++)
-				{
-					if (c[i + delta_y[k]][j + delta_x[k]] & OCCUPIED) continue;
-					if (c[i + delta_y[k] * 2][j + delta_x[k] * 2] & OCCUPIED) continue;
-
-					c[i][j] &= ~BOX;
-					changed = 1;
-				}
-			}
+				if (c[i][j] & BOX)
+					b[i][j] = WALL;
 	}
-
-	for (i = 0; i < height; i++)
-		for (j = 0; j < width; j++)
-			if (c[i][j] & BOX)
-				b[i][j] = WALL;
 
 
 
 	// eliminate pushable boxes
-	copy_board(b, c);
-	changed = 1;
-
-	while (changed)
+	if (boxes_num > targets_num)
 	{
-		changed = 0;
+		copy_board(b, c);
+		changed = 1;
+
+		while (changed)
+		{
+			changed = 0;
+
+			for (i = 0; i < height; i++)
+				for (j = 0; j < width; j++)
+				{
+					if ((c[i][j] & BOX) == 0) continue;
+					for (k = 0; k < 4; k++)
+					{
+						if (c[i + delta_y[k]][j + delta_x[k]] & OCCUPIED) continue;
+						if (c[i - delta_y[k]][j - delta_x[k]] & OCCUPIED) continue;
+
+						c[i][j] &= ~BOX;
+						changed = 1;
+					}
+				}
+		}
 
 		for (i = 0; i < height; i++)
 			for (j = 0; j < width; j++)
-			{
-				if ((c[i][j] & BOX) == 0) continue;
-				for (k = 0; k < 4; k++)
-				{
-					if (c[i + delta_y[k]][j + delta_x[k]] & OCCUPIED) continue;
-					if (c[i - delta_y[k]][j - delta_x[k]] & OCCUPIED) continue;
-
-					c[i][j] &= ~BOX;
-					changed = 1;
-				}
-			}
+				if (c[i][j] & BOX)
+					b[i][j] = WALL;
 	}
-
-	for (i = 0; i < height; i++)
-		for (j = 0; j < width; j++)
-			if (c[i][j] & BOX)
-				b[i][j] = WALL;
 }
