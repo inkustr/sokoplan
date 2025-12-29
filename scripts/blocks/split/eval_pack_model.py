@@ -101,49 +101,48 @@ def main() -> None:
 
     graph_cache: Dict[Tuple[int, int, int, int, int], Tuple[torch.Tensor, Dict[int, int], List[int], torch.Tensor]] = {}
 
-    try:
-        for rec in _iter_jsonl(args.labels, limit=limit):
-            y = float(int(rec["y"]))
-            level_id = str(rec["level_id"])
-            s = State(
-                width=int(rec["width"]),
-                height=int(rec["height"]),
-                walls=int(rec["walls"]),
-                goals=int(rec["goals"]),
-                boxes=int(rec["boxes"]),
-                player=int(rec["player"]),
-                board_mask=int(rec["board_mask"]),
-            )
+    for rec in _iter_jsonl(args.labels, limit=limit):
+        y = float(int(rec["y"]))
+        level_id = str(rec["level_id"])
+        s = State(
+            width=int(rec["width"]),
+            height=int(rec["height"]),
+            walls=int(rec["walls"]),
+            goals=int(rec["goals"]),
+            boxes=int(rec["boxes"]),
+            player=int(rec["player"]),
+            board_mask=int(rec["board_mask"]),
+        )
 
-            key = (s.width, s.height, s.walls, s.goals, s.board_mask)
-            if key not in graph_cache:
-                data, idx2nid = grid_to_graph(s)
-                floor_idxs = [0] * len(idx2nid)
-                for idx_cell, nid in idx2nid.items():
-                    floor_idxs[nid] = idx_cell
-                static_x = data.x.clone()
-                static_x[:, 1] = 0.0
-                static_x[:, 2] = 0.0
-                edge_index = data.edge_index.to(device)
-                graph_cache[key] = (edge_index, idx2nid, floor_idxs, static_x)
+        key = (s.width, s.height, s.walls, s.goals, s.board_mask)
+        if key not in graph_cache:
+            data, idx2nid = grid_to_graph(s)
+            floor_idxs = [0] * len(idx2nid)
+            for idx_cell, nid in idx2nid.items():
+                floor_idxs[nid] = idx_cell
+            static_x = data.x.clone()
+            static_x[:, 1] = 0.0
+            static_x[:, 2] = 0.0
+            edge_index = data.edge_index.to(device)
+            graph_cache[key] = (edge_index, idx2nid, floor_idxs, static_x)
 
-            edge_index, idx2nid, floor_idxs, static_x = graph_cache[key]
-            x = static_x.clone()
-            for nid, idx_cell in enumerate(floor_idxs):
-                if s.has_box(idx_cell):
-                    x[nid, 1] = 1.0
-            nid_player = idx2nid.get(s.player)
-            if nid_player is not None:
-                x[nid_player, 2] = 1.0
+        edge_index, idx2nid, floor_idxs, static_x = graph_cache[key]
+        x = static_x.clone()
+        for nid, idx_cell in enumerate(floor_idxs):
+            if s.has_box(idx_cell):
+                x[nid, 1] = 1.0
+        nid_player = idx2nid.get(s.player)
+        if nid_player is not None:
+            x[nid_player, 2] = 1.0
 
-            x = x.to(device)
-            batch = torch.zeros(x.size(0), dtype=torch.long, device=device)
-            with torch.no_grad():
-                y_hat = model(x, edge_index, batch).view(-1)[0].item()
-            yhat = float(max(0.0, y_hat))
+        x = x.to(device)
+        batch = torch.zeros(x.size(0), dtype=torch.long, device=device)
+        with torch.no_grad():
+            y_hat = model(x, edge_index, batch).view(-1)[0].item()
+        yhat = float(max(0.0, y_hat))
 
-            overall.add(y, yhat)
-            per_level[level_id].add(y, yhat)
+        overall.add(y, yhat)
+        per_level[level_id].add(y, yhat)
 
     out_obj = {
         "ckpt": args.ckpt,
