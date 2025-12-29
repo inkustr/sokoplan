@@ -50,6 +50,7 @@ def main() -> None:
     os.makedirs(args.out_lists_dir, exist_ok=True)
 
     splits = 0
+    kept = 0
     for fn in files:
         pack = os.path.splitext(fn)[0]
         path = os.path.join(args.eval_dir, fn)
@@ -61,27 +62,35 @@ def main() -> None:
             mae = float(m.get("mae", 0.0))
             items.append((level_id, mae))
 
-        if len(items) < args.min_levels_to_split:
+        if not items:
+            # Nothing to write.
             continue
 
         items.sort(key=lambda x: x[1], reverse=True)
-        if args.method == "mae":
-            hard = [lid for lid, mae in items if mae > args.mae_threshold]
-        else:
-            k = max(1, int(round(args.pct * len(items))))
-            hard = [lid for lid, _ in items[:k]]
+        should_consider_split = len(items) >= args.min_levels_to_split
+        hard: List[str] = []
+        if should_consider_split:
+            if args.method == "mae":
+                hard = [lid for lid, mae in items if mae > args.mae_threshold]
+            else:
+                k = max(1, int(round(args.pct * len(items))))
+                hard = [lid for lid, _ in items[:k]]
 
         hard_set = set(hard)
         easy = [lid for lid, _ in items if lid not in hard_set]
 
-        if len(hard) < 30 or len(easy) < 30:
+        can_split = should_consider_split and (len(hard) >= 30 and len(easy) >= 30)
+        if not can_split:
+            # Keep the pack as-is for the next iteration.
+            _write_list(os.path.join(args.out_lists_dir, f"{pack}.list"), sorted([lid for lid, _ in items]))
+            kept += 1
             continue
 
         _write_list(os.path.join(args.out_lists_dir, f"{pack}_easy.list"), sorted(easy))
         _write_list(os.path.join(args.out_lists_dir, f"{pack}_hard.list"), sorted(hard))
         splits += 1
 
-    print(f"wrote splits for {splits} packs → {args.out_lists_dir}")
+    print(f"wrote: splits={splits} kept={kept} → {args.out_lists_dir}")
 
 
 if __name__ == "__main__":

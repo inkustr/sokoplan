@@ -50,9 +50,9 @@ def main() -> None:
 
     _ensure_dir(args.out_dir)
 
-    group_list_files = sorted([f for f in os.listdir(args.groups_lists_dir) if f.startswith("group_") and f.endswith(".list")])
+    group_list_files = sorted([f for f in os.listdir(args.groups_lists_dir) if f.endswith(".list")])
     if not group_list_files:
-        raise SystemExit(f"No group_*.list found under: {args.groups_lists_dir}")
+        raise SystemExit(f"No *.list found under: {args.groups_lists_dir}")
 
     level_to_group: Dict[str, str] = {}
     expected_by_group: Dict[str, Set[str]] = {}
