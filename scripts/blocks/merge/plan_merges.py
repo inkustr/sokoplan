@@ -6,10 +6,10 @@ Plan merges from cross-evaluation results.
 Input:
   cross_eval.csv with columns: model_pack,data_pack,mae,mse,...
 
-Creates merge edges using one of the strategies:
-  - auto: choose the ratio threshold automatically from the distribution of mutual pairs
-      score(A,B) = max( mae(A on B)/self_mae[A], mae(B on A)/self_mae[B] )
-      keep pairs with score <= quantile(score, q)
+Creates merge edges using following method:
+  - choose the ratio threshold automatically from the distribution of mutual pairs
+  - score(A,B) = max( mae(A on B)/self_mae[A], mae(B on A)/self_mae[B] )
+  - keep pairs with score <= quantile(score, q)
 
 Then compute connected components (union-find) and write group list files:
   out_lists_dir/group_XXX.list
@@ -149,6 +149,14 @@ def main() -> None:
         default=1,
         help="Minimum number of packs in a group to write. Use 1 to include singleton packs.",
     )
+    p.add_argument(
+        "--allow_missing_lists",
+        action="store_true",
+        help=(
+            "By default, fail if any pack referenced by cross-eval is missing its .list file in --packs_lists_dir. "
+            "Set this to allow missing packs to be skipped (NOT recommended, can create empty/partial groups)."
+        ),
+    )
     args = p.parse_args()
 
     mae: Dict[Tuple[str, str], float] = {}
@@ -225,13 +233,28 @@ def main() -> None:
 
     os.makedirs(args.out_lists_dir, exist_ok=True)
     wrote = 0
+    missing_lists: List[str] = []
+    empty_groups = 0
     for i, group in enumerate(groups):
         ids: List[str] = []
         for pack in group:
             lp = os.path.join(args.packs_lists_dir, f"{pack}.list")
-            if os.path.exists(lp):
-                ids.extend(_read_list(lp))
+            if not os.path.exists(lp):
+                missing_lists.append(lp)
+                continue
+            ids.extend(_read_list(lp))
+        if missing_lists and not args.allow_missing_lists:
+            sample = "\n".join(missing_lists[:15])
+            raise SystemExit(
+                "Missing pack list files under --packs_lists_dir.\n"
+                f"packs_lists_dir={args.packs_lists_dir}\n"
+                f"missing_count={len(missing_lists)} (showing first 15):\n{sample}\n\n"
+                "This usually means you passed the wrong lists directory for the packs referenced in cross_eval.csv.\n"
+                "If you really want to proceed anyway, pass --allow_missing_lists (NOT recommended)."
+            )
         outp = os.path.join(args.out_lists_dir, f"group_{i:03d}.list")
+        if not ids:
+            empty_groups += 1
         _write_list(outp, ids)
         wrote += 1
 
@@ -241,6 +264,10 @@ def main() -> None:
         print(f"missing_self_eval_for={missing_self} mutual_pairs (skipped)")
     print(f"picked_edges={len(picked)}")
     print(f"groups_written={wrote}")
+    if missing_lists:
+        print(f"WARNING: missing_list_files={len(missing_lists)} (use correct --packs_lists_dir or omit --allow_missing_lists)")
+    if empty_groups:
+        print(f"WARNING: empty_group_files={empty_groups} (this indicates missing lists or empty input packs)")
 
 
 if __name__ == "__main__":
