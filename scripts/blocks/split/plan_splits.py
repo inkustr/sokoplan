@@ -15,6 +15,14 @@ Run:
     --eval_dir results/packs_self_eval \
     --out_lists_dir sokoban_core/levels/pack_blocks/lists \
     --method top_pct --pct 0.2
+
+Or with guards:
+python -m scripts.blocks.split.plan_splits \
+  --eval_dir results/packs_self_eval \
+  --out_lists_dir sokoban_core/levels/pack_blocks_2/lists \
+  --method top_pct --pct 0.2 \
+  --min_hard_mae 60 \
+  --min_hard_easy_gap 30
 """
 
 import argparse
@@ -38,6 +46,36 @@ def main() -> None:
     p.add_argument("--mae_threshold", type=float, default=3.0)
     p.add_argument("--pct", type=float, default=0.2, help="fraction of worst levels to mark as hard")
     p.add_argument("--min_levels_to_split", type=int, default=50)
+    p.add_argument(
+        "--min_hard_mae",
+        type=float,
+        default=0.0,
+        help=(
+            "Extra guardrail: only split if the average MAE of the selected hard set is >= this value. "
+            "Useful with --method top_pct to avoid splitting 'good' packs just because they are large."
+        ),
+    )
+    p.add_argument(
+        "--min_hard_easy_gap",
+        type=float,
+        default=0.0,
+        help=(
+            "Extra guardrail: only split if mean(hard_mae) - mean(easy_mae) is >= this value. "
+            "Useful with --method top_pct to ensure there is a real hard tail."
+        ),
+    )
+    p.add_argument(
+        "--min_hard_levels",
+        type=int,
+        default=30,
+        help="Minimum number of levels in hard split (only used when splitting).",
+    )
+    p.add_argument(
+        "--min_easy_levels",
+        type=int,
+        default=30,
+        help="Minimum number of levels in easy split (only used when splitting).",
+    )
     args = p.parse_args()
 
     if not os.path.isdir(args.eval_dir):
@@ -51,6 +89,7 @@ def main() -> None:
 
     splits = 0
     kept = 0
+    skipped_by_guards = 0
     for fn in files:
         pack = os.path.splitext(fn)[0]
         path = os.path.join(args.eval_dir, fn)
@@ -79,7 +118,18 @@ def main() -> None:
         hard_set = set(hard)
         easy = [lid for lid, _ in items if lid not in hard_set]
 
-        can_split = should_consider_split and (len(hard) >= 30 and len(easy) >= 30)
+        can_split = should_consider_split and (len(hard) >= args.min_hard_levels and len(easy) >= args.min_easy_levels)
+        if can_split and (args.min_hard_mae > 0.0 or args.min_hard_easy_gap > 0.0):
+            hard_maes = [mae for _, mae in items if _ in hard_set]
+            easy_maes = [mae for _, mae in items if _ not in hard_set]
+            mean_hard = sum(hard_maes) / max(1, len(hard_maes))
+            mean_easy = sum(easy_maes) / max(1, len(easy_maes))
+            gap = mean_hard - mean_easy
+            if (args.min_hard_mae > 0.0 and mean_hard < args.min_hard_mae) or (
+                args.min_hard_easy_gap > 0.0 and gap < args.min_hard_easy_gap
+            ):
+                can_split = False
+                skipped_by_guards += 1
         if not can_split:
             # Keep the pack as-is for the next iteration.
             _write_list(os.path.join(args.out_lists_dir, f"{pack}.list"), sorted([lid for lid, _ in items]))
@@ -90,7 +140,13 @@ def main() -> None:
         _write_list(os.path.join(args.out_lists_dir, f"{pack}_hard.list"), sorted(hard))
         splits += 1
 
-    print(f"wrote: splits={splits} kept={kept} → {args.out_lists_dir}")
+    if args.method == "top_pct" and args.min_hard_mae <= 0.0 and args.min_hard_easy_gap <= 0.0:
+        print(
+            "NOTE: --method top_pct will split most sufficiently-large packs unless you add guardrails like "
+            "--min_hard_mae and/or --min_hard_easy_gap.",
+            flush=True,
+        )
+    print(f"wrote: splits={splits} kept={kept} skipped_by_guards={skipped_by_guards} → {args.out_lists_dir}")
 
 
 if __name__ == "__main__":
