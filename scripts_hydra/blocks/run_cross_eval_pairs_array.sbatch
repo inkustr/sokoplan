@@ -9,7 +9,7 @@
 #SBATCH --mem=16G
 #SBATCH --gpus-per-node=1
 #SBATCH --constraint="80gb|40gb|h100|6000"
-#SBATCH --array=0-20
+#SBATCH --array=0-34
 
 # Requires:
 #   results/merge_pairs.csv (build via scripts.blocks.build_merge_pairs)
@@ -24,16 +24,16 @@ mkdir -p results/cross_eval
 source .venv/bin/activate
 
 PAIRS="${PAIRS:-results/merge_pairs.csv}"
-LABELS_DIR="${LABELS_DIR:-data/packs_labels_festival}"
+LABELS_DIR="${LABELS_DIR:-data/group_labels_festival}"
 MODELS_DIR="${MODELS_DIR:-artifacts/packs_models}"
 OUT_DIR="${OUT_DIR:-results/cross_eval}"
-NUM_SHARDS="${NUM_SHARDS:-21}"
+NUM_SHARDS="${NUM_SHARDS:-35}"
 SHARD_IDX="${SLURM_ARRAY_TASK_ID}"
-LIMIT_RECORDS="${LIMIT_RECORDS:-5000}"
+LIMIT_RECORDS="${LIMIT_RECORDS:-7000}"
 
 out="${OUT_DIR}/cross_eval_shard_${SHARD_IDX}.csv"
 
-python3 -m scripts.blocks.run_cross_eval \
+python3 -m scripts.blocks.merge.run_cross_eval \
   --pairs "$PAIRS" \
   --labels_dir "$LABELS_DIR" \
   --models_dir "$MODELS_DIR" \

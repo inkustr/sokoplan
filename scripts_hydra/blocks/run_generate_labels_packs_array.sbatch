@@ -5,7 +5,7 @@
 #SBATCH --time=2-00:00:00
 #SBATCH --partition=cpu-2d
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=24
 #SBATCH --mem=128G
 #SBATCH --array=0-49
 
@@ -23,7 +23,7 @@ PACKS_DIR="${PACKS_DIR:-sokoban_core/levels/packs_filtered}"
 LISTS_DIR="${PACKS_DIR}/lists"
 OUT_DIR="${OUT_DIR:-data/packs_labels_festival}"
 TIME_LIMIT="${TIME_LIMIT:-3600}"
-JOBS="${JOBS:-0}"
+JOBS="${JOBS:-$SLURM_CPUS_PER_TASK}"
 SAMPLE_EVERY="${SAMPLE_EVERY:-3}"
 NUM_SHARDS="${NUM_SHARDS:-50}"
 SHARD_IDX="${SLURM_ARRAY_TASK_ID}"

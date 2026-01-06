@@ -9,7 +9,7 @@
 #SBATCH --mem=64G
 #SBATCH --gpus-per-node=1
 #SBATCH --constraint="80gb|40gb|h100|6000"
-#SBATCH --array=0-20
+#SBATCH --array=0-34
 
 # Train one small GNN per PACK.
 #
@@ -33,12 +33,12 @@ else
   exit 1
 fi
 
-LABELS_DIR="${LABELS_DIR:-data/packs_labels_festival}"
+LABELS_DIR="${LABELS_DIR:-data/group_labels_festival}"
 OUT_DIR="${OUT_DIR:-artifacts/packs_models}"
-NUM_SHARDS="${NUM_SHARDS:-21}"
+NUM_SHARDS="${NUM_SHARDS:-35}"
 SHARD_IDX="${SLURM_ARRAY_TASK_ID}"
 
-EPOCHS="${EPOCHS:-5}"
+EPOCHS="${EPOCHS:-9}"
 BATCH="${BATCH:-512}"
 HIDDEN="${HIDDEN:-64}"
 LAYERS="${LAYERS:-3}"
