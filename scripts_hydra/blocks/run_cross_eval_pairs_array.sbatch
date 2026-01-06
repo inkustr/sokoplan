@@ -3,12 +3,10 @@
 #SBATCH --output=logs/crosseval_%A_%a.out
 #SBATCH --error=logs/crosseval_%A_%a.err
 #SBATCH --time=5:00:00
-#SBATCH --partition=gpu-5h
+#SBATCH --partition=cpu-5h
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=16G
-#SBATCH --gpus-per-node=1
-#SBATCH --constraint="80gb|40gb|h100|6000"
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
 #SBATCH --array=0-34
 
 # Requires:

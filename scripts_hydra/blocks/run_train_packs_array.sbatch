@@ -44,6 +44,11 @@ HIDDEN="${HIDDEN:-64}"
 LAYERS="${LAYERS:-3}"
 LR="${LR:-1e-3}"
 DROPOUT="${DROPOUT:-0.05}"
+AMP="${AMP:-1}"
+WORKERS="${WORKERS:-4}"
+PREFETCH="${PREFETCH:-4}"
+TORCH_THREADS="${TORCH_THREADS:-1}"
+USE_TMP="${USE_TMP:-0}"
 
 FILES=($(ls -1 "${LABELS_DIR}"/*.jsonl | sort))
 echo "Total label files: ${#FILES[@]}"
@@ -75,6 +80,12 @@ for i in "${!FILES[@]}"; do
     --layers "$LAYERS" \
     --lr "$LR" \
     --dropout "$DROPOUT" \
+    --workers "$WORKERS" \
+    --prefetch_factor "$PREFETCH" \
+    --pin_memory \
+    --persistent_workers \
+    --torch_threads "$TORCH_THREADS" \
+    $AMP_FLAG \
     --out "$OUT_PATH"
 
   count=$((count + 1))
