@@ -27,6 +27,14 @@ def main():
     p.add_argument("--out", default="artifacts/gnn_best.pt")
     p.add_argument("--checkpoint", default="artifacts/gnn_checkpoint.pt", help="checkpoint file for resuming")
     p.add_argument("--resume", action="store_true", help="resume from checkpoint if exists")
+    p.add_argument(
+        "--init_model",
+        default="",
+        help=(
+            "Optional path to a model checkpoint to initialize weights from (fine-tuning). "
+            "Loads only model_state_dict (no optimizer state). Ignored if --resume successfully loads a checkpoint."
+        ),
+    )
     p.add_argument("--temp_folder", required=False, help="folder to save epoch models")
     args = p.parse_args()
 
@@ -70,6 +78,16 @@ def main():
     dl_val = DataLoader(ds_val, shuffle=False, **dl_kwargs)
 
     model = GINHeuristic(in_dim=4, hidden=args.hidden, layers=args.layers, dropout=args.dropout).to(device)
+    if args.init_model and (not (args.resume and os.path.exists(args.checkpoint))):
+        if not os.path.exists(args.init_model):
+            raise SystemExit(f"--init_model not found: {args.init_model}")
+        print(f"[INFO] Initializing model weights from: {args.init_model}")
+        init_obj = torch.load(args.init_model, map_location=device)
+        init_sd = init_obj.get("model_state_dict", init_obj)
+        if not isinstance(init_sd, dict):
+            raise SystemExit(f"Invalid init_model format at {args.init_model} (expected dict-like state_dict).")
+        model.load_state_dict(init_sd)
+
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr)
     if args.amp and device.type == "cuda":
         try:

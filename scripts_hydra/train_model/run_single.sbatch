@@ -2,8 +2,8 @@
 #SBATCH --job-name=soko_train
 #SBATCH --output=logs/train_%j.out
 #SBATCH --error=logs/train_%j.err
-#SBATCH --time=7-00:00:00
-#SBATCH --partition=gpu-7d
+#SBATCH --time=05:00:00
+#SBATCH --partition=gpu-5h
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
@@ -28,11 +28,13 @@ echo "Python: $(which python3)"
 # Training parameters
 TRAIN_DATA="${TRAIN_DATA:-data/train_labels.jsonl}"
 VAL_DATA="${VAL_DATA:-data/val_labels.jsonl}"
-OUTPUT_MODEL="artifacts/gnn_best_${SLURM_JOB_ID}.pt"
-CHECKPOINT="artifacts/gnn_checkpoint_${SLURM_JOB_ID}.pt"
-EPOCHS="${EPOCHS:-5}"
+INIT_MODEL="${INIT_MODEL:-}"
+# INIT_MODEL="${INIT_MODEL:-artifacts/gnn_best_5e.pt}"
+OUTPUT_MODEL="${OUTPUT_MODEL:-artifacts/gnn_best_${SLURM_JOB_ID}.pt}"
+CHECKPOINT="${CHECKPOINT:-artifacts/gnn_checkpoint_${SLURM_JOB_ID}.pt}"
+EPOCHS="${EPOCHS:-7}"
 BATCH="${BATCH:-2048}"
-HIDDEN="${HIDDEN:-256}"
+HIDDEN="${HIDDEN:-128}"
 LAYERS="${LAYERS:-5}"
 LR="${LR:-5e-4}"
 DROPOUT="${DROPOUT:-0.1}"
@@ -80,6 +82,17 @@ fi
 export OMP_NUM_THREADS="$TORCH_THREADS"
 export MKL_NUM_THREADS="$TORCH_THREADS"
 
+# Optional init flag (safe: no backslash/comment pitfalls)
+INIT_FLAG=""
+if [ -n "${INIT_MODEL}" ]; then
+  if [ -f "${INIT_MODEL}" ]; then
+    echo "Initializing from INIT_MODEL: ${INIT_MODEL}"
+    INIT_FLAG="--init_model ${INIT_MODEL}"
+  else
+    echo "WARNING: INIT_MODEL is set but file not found: ${INIT_MODEL} (ignored)"
+  fi
+fi
+
 # Run training with checkpoint support
 python3 -m scripts.train_gnn \
     --train "$LOCAL_TRAIN" \
@@ -90,6 +103,7 @@ python3 -m scripts.train_gnn \
     --layers "$LAYERS" \
     --dropout "$DROPOUT" \
     --lr "$LR" \
+    $INIT_FLAG \
     --workers "$WORKERS" \
     --prefetch_factor "$PREFETCH" \
     --pin_memory \

@@ -15,10 +15,12 @@ Then compute connected components (union-find) and write group list files:
   out_lists_dir/group_XXX.list
 
 Run:
-  python -m scripts.blocks.plan_merges \
-    --cross_eval results/cross_eval.csv \
-    --self_eval_dir results/packs_self_eval \
-    --strategy auto --ratio_quantile 0.10 --offset 2.0 --max_degree 4
+    python -m scripts.blocks.merge.plan_merges \                                
+    --cross_eval results/cross_eval.csv \                  
+    --self_eval_dir results/packs_self_eval \                   
+    --ratio_quantile 0.10 --offset 2.0 --max_degree 4 \
+    --packs_lists_dir sokoban_core/levels/pack_groups/lists \
+    --out_lists_dir sokoban_core/levels/pack_groups_2/lists
 """
 
 import argparse
