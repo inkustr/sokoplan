@@ -105,6 +105,8 @@ def main():
         ckpt = torch.load(args.checkpoint, map_location=device)
         model.load_state_dict(ckpt['model_state_dict'])
         opt.load_state_dict(ckpt['optimizer_state_dict'])
+        for pg in opt.param_groups:
+            pg["lr"] = float(args.lr)
         if scaler is not None and "scaler_state_dict" in ckpt:
             scaler.load_state_dict(ckpt["scaler_state_dict"])
         start_epoch = ckpt['epoch'] + 1
