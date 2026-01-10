@@ -51,13 +51,15 @@ class GNNHeuristic:
                 max_conv_idx = idx
         layers = (max_conv_idx + 1) if max_conv_idx >= 0 else 4
 
-        # Infer hidden size from "convs.0.nn.net.0.weight": shape [hidden, in_dim]
+        # Infer hidden size / input feature dim from "convs.0.nn.net.0.weight": shape [hidden, in_dim]
         hidden = 128
+        in_dim = 7
         w0 = sd.get("convs.0.nn.net.0.weight")
         if isinstance(w0, torch.Tensor) and w0.ndim == 2 and w0.shape[0] > 0:
             hidden = int(w0.shape[0])
+            in_dim = int(w0.shape[1])
 
-        self.model = GINHeuristic(in_dim=4, hidden=hidden, layers=layers)
+        self.model = GINHeuristic(in_dim=in_dim, hidden=hidden, layers=layers)
         self.model.load_state_dict(sd)
         self.model.eval().to(self.device)
 
@@ -79,11 +81,11 @@ class GNNHeuristic:
         self._edge_index: Optional[torch.Tensor] = None
         self._floor_mask: Optional[List[int]] = None
         self._idx2nid: Optional[List[int]] = None  # cell_idx -> node_id (or -1)
-        self._static_features: Optional[torch.Tensor] = None  # [is_goal, walls_around]
+        self._static_features: Optional[torch.Tensor] = None  # [is_goal, wall_up, wall_down, wall_left, wall_right]
         self._board_signature: Optional[Tuple[int, int, int]] = None  # (width, height, board_mask)
         
         # Buffers reused across calls
-        self._feature_buffer: Optional[torch.Tensor] = None  # Full [n, 4] feature matrix
+        self._feature_buffer: Optional[torch.Tensor] = None  # Full [n, in_dim] feature matrix
         self._batch_buffer: Optional[torch.Tensor] = None
 
     def _build_static_structure(self, s: State) -> None:
@@ -118,22 +120,16 @@ class GNNHeuristic:
                         dst.append(nj)
         edge_index = torch.tensor([src, dst], dtype=torch.long, device=self.device)
         
-        # Build static features (goal, walls_around)
+        # Build static features (goal + directional walls)
         static_feats: List[List[float]] = []
         for idx in floor_mask:
             is_goal = 1.0 if s.is_goal_cell(idx) else 0.0
-            # walls around
-            walls_around = 0
             r, c = divmod(idx, W)
-            for dr, dc in ((-1,0),(1,0),(0,-1),(0,1)):
-                rr, cc = r+dr, c+dc
-                if not (0 <= rr < H and 0 <= cc < W):
-                    walls_around += 1
-                else:
-                    j = rr * W + cc
-                    if s.is_wall(j):
-                        walls_around += 1
-            static_feats.append([is_goal, walls_around/4.0])
+            up = 1.0 if (r == 0 or s.is_wall((r - 1) * W + c)) else 0.0
+            down = 1.0 if (r == H - 1 or s.is_wall((r + 1) * W + c)) else 0.0
+            left = 1.0 if (c == 0 or s.is_wall(r * W + (c - 1))) else 0.0
+            right = 1.0 if (c == W - 1 or s.is_wall(r * W + (c + 1))) else 0.0
+            static_feats.append([is_goal, up, down, left, right])
         
         self._edge_index = edge_index
         self._floor_mask = floor_mask
@@ -168,9 +164,10 @@ class GNNHeuristic:
 
         n = len(self._floor_mask)
         if self._feature_buffer is None or self._feature_buffer.shape[0] != n:
-            self._feature_buffer = torch.zeros((n, 4), dtype=torch.float, device=self.device)
+            # x features: [is_goal, has_box, is_player, wall_up, wall_down, wall_left, wall_right]
+            self._feature_buffer = torch.zeros((n, 7), dtype=torch.float, device=self.device)
             self._feature_buffer[:, 0] = self._static_features[:, 0]
-            self._feature_buffer[:, 3] = self._static_features[:, 1]
+            self._feature_buffer[:, 3:7] = self._static_features[:, 1:5]
             self._batch_buffer = torch.zeros(n, dtype=torch.long, device=self.device)
         
         self._feature_buffer[:, 1].zero_()

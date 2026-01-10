@@ -75,8 +75,13 @@ def _load_model(ckpt_path: str, device: torch.device) -> torch.nn.Module:
     hidden = int(cfg.get("hidden", 128))
     layers = int(cfg.get("layers", 4))
     dropout = float(cfg.get("dropout", 0.0))
-    model = GINHeuristic(in_dim=4, hidden=hidden, layers=layers, dropout=dropout).to(device)
-    model.load_state_dict(obj["model_state_dict"])
+    sd = obj.get("model_state_dict", obj)
+    if not isinstance(sd, dict):
+        raise RuntimeError(f"Invalid checkpoint format at {ckpt_path}: expected dict-like state_dict.")
+    w0 = sd.get("convs.0.nn.net.0.weight")
+    in_dim = int(w0.shape[1]) if isinstance(w0, torch.Tensor) and w0.ndim == 2 else int(cfg.get("in_dim", 7))
+    model = GINHeuristic(in_dim=in_dim, hidden=hidden, layers=layers, dropout=dropout).to(device)
+    model.load_state_dict(sd)
     model.eval()
     return model
 

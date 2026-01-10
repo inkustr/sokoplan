@@ -17,7 +17,7 @@ class MLP(nn.Module):
 
 
 class GINHeuristic(nn.Module):
-    def __init__(self, in_dim: int = 4, hidden: int = 128, layers: int = 4, dropout: float = 0.0):
+    def __init__(self, in_dim: int = 7, hidden: int = 128, layers: int = 4, dropout: float = 0.0):
         super().__init__()
         convs = []
         dims = [in_dim] + [hidden] * layers

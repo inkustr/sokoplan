@@ -77,7 +77,11 @@ def main():
     dl_train = DataLoader(ds_train, shuffle=True, **dl_kwargs)
     dl_val = DataLoader(ds_val, shuffle=False, **dl_kwargs)
 
-    model = GINHeuristic(in_dim=4, hidden=args.hidden, layers=args.layers, dropout=args.dropout).to(device)
+    sample0 = ds_train[0]
+    in_dim = int(sample0.x.shape[1])
+    args.in_dim = in_dim
+
+    model = GINHeuristic(in_dim=in_dim, hidden=args.hidden, layers=args.layers, dropout=args.dropout).to(device)
     if args.init_model and (not (args.resume and os.path.exists(args.checkpoint))):
         if not os.path.exists(args.init_model):
             raise SystemExit(f"--init_model not found: {args.init_model}")

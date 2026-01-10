@@ -12,7 +12,9 @@ def grid_to_graph(state: State) -> Tuple[Data, Dict[int, int]]:
 
     Nodes: all *floor* cells (inside board & not walls). Walls excluded.
     Edges: 4-neighborhood between floor cells.
-    Node features (x): [is_goal, has_box, is_player, walls_around/4].
+    Node features (x):
+      [is_goal, has_box, is_player, wall_up, wall_down, wall_left, wall_right]
+    (directional walls instead of a single walls_around scalar).
 
     Returns (Data, idx2nid) where idx2nid maps cell index -> node id (only for floor nodes).
     """
@@ -54,18 +56,13 @@ def grid_to_graph(state: State) -> Tuple[Data, Dict[int, int]]:
         is_goal = 1.0 if state.is_goal_cell(idx) else 0.0
         has_box = 1.0 if state.has_box(idx) else 0.0
         is_player = 1.0 if idx == state.player else 0.0
-        # walls around (treat outside as wall)
-        walls_around = 0
+        # Directional walls (treat outside as wall)
         r, c = divmod(idx, W)
-        for dr, dc in ((-1,0),(1,0),(0,-1),(0,1)):
-            rr, cc = r+dr, c+dc
-            if not (0 <= rr < H and 0 <= cc < W):
-                walls_around += 1
-            else:
-                j = rr * W + cc
-                if state.is_wall(j):
-                    walls_around += 1
-        feats.append([is_goal, has_box, is_player, walls_around/4.0])
+        up = 1.0 if (r == 0 or state.is_wall((r - 1) * W + c)) else 0.0
+        down = 1.0 if (r == H - 1 or state.is_wall((r + 1) * W + c)) else 0.0
+        left = 1.0 if (c == 0 or state.is_wall(r * W + (c - 1))) else 0.0
+        right = 1.0 if (c == W - 1 or state.is_wall(r * W + (c + 1))) else 0.0
+        feats.append([is_goal, has_box, is_player, up, down, left, right])
 
     x = torch.tensor(feats, dtype=torch.float)
 
