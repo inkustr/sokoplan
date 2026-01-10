@@ -72,7 +72,7 @@ class GNNHeuristic:
         
         self.mode = mode
         self.use_deadlocks = use_deadlocks
-        self._cache: Dict[int, int] = {}
+        self._cache: Dict[int, float] = {}
         self._zobrist: Optional[Zobrist] = None
         
         # Cache static graph structure (reused across all states in a level)
@@ -141,7 +141,7 @@ class GNNHeuristic:
         self._static_features = torch.tensor(static_feats, dtype=torch.float, device=self.device)
         self._board_signature = (s.width, s.height, int(s.board_mask))
     
-    def __call__(self, s: State) -> int:
+    def __call__(self, s: State) -> float:
         # lazy init zobrist (depends on board shape)
         if self._zobrist is None:
             self._zobrist = Zobrist(s.width, s.height, s.board_mask)
@@ -150,8 +150,9 @@ class GNNHeuristic:
             return self._cache[key]
 
         if self.use_deadlocks and has_deadlock(s):
-            self._cache[key] = INF
-            return INF
+            v = float(INF)
+            self._cache[key] = v
+            return v
 
         # Check if we need to rebuild static structure
         board_sig = (s.width, s.height, int(s.board_mask))
@@ -192,7 +193,7 @@ class GNNHeuristic:
             y_hat = self.model(self._feature_buffer, self._edge_index, self._batch_buffer)
             gnn_val = float(y_hat.view(-1)[0].item())
         
-        gnn_est = max(0, int(round(gnn_val)))
+        gnn_est = max(0.0, float(gnn_val))
 
         if self.mode == "optimal_mix":
             h_val = min(gnn_est, h_manhattan_hungarian(s))

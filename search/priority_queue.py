@@ -4,10 +4,10 @@ from typing import Any, List, Tuple
 
 class PriorityQueue:
     def __init__(self) -> None:
-        self._h: List[Tuple[int, int, Any]] = []
+        self._h: List[Tuple[float, int, Any]] = []
         self._tiebreak = 0
 
-    def push(self, priority: int, item: Any) -> None:
+    def push(self, priority: float, item: Any) -> None:
         self._tiebreak += 1
         heapq.heappush(self._h, (priority, self._tiebreak, item))
 

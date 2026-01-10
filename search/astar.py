@@ -22,7 +22,7 @@ def reconstruct(parent: Dict[State, Optional[State]], goal: State) -> List[State
 
 def astar(
     start: State,
-    h_fn: Callable[[State], int],
+    h_fn: Callable[[State], float],
     is_goal_fn: Callable[[State], bool],
     succ_fn: Callable[[State], List[State]] = successors_pushes,
     trans: Optional[Transposition] = None,
@@ -33,7 +33,7 @@ def astar(
     openq = PriorityQueue()
     g: Dict[State, int] = {start: 0}
     parent: Dict[State, Optional[State]] = {start: None}
-    h0 = h_fn(start)
+    h0 = float(h_fn(start))
     if h0 >= 10 ** 9:
         # start is already in deadlock
         runtime = time.time() - t0
@@ -66,7 +66,7 @@ def astar(
             if ns not in g or ng < g[ns]:
                 g[ns] = ng
                 parent[ns] = s
-                hn = h_fn(ns)
+                hn = float(h_fn(ns))
                 if hn < 10 ** 9:
                     openq.push(ng + hn, (ng, ns))
 
