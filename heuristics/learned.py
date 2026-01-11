@@ -59,7 +59,11 @@ class GNNHeuristic:
             hidden = int(w0.shape[0])
             in_dim = int(w0.shape[1])
 
-        self.model = GINHeuristic(in_dim=in_dim, hidden=hidden, layers=layers)
+        # Infer whether checkpoint was trained with edge-aware convs (GINEConv).
+        # PyG stores the edge encoder as "convs.<i>.lin.weight" when edge_dim is used.
+        use_gine = any(str(k).startswith("convs.0.lin.") for k in sd.keys())
+
+        self.model = GINHeuristic(in_dim=in_dim, hidden=hidden, layers=layers, conv=("gine" if use_gine else "gin"))
         self.model.load_state_dict(sd)
         self.model.eval().to(self.device)
 
@@ -67,7 +71,11 @@ class GNNHeuristic:
             dummy_x = torch.randn(10, int(in_dim), device=self.device)
             dummy_edge = torch.tensor([[0, 1, 2], [1, 2, 0]], dtype=torch.long, device=self.device)
             dummy_batch = torch.zeros(10, dtype=torch.long, device=self.device)
-            self.model = torch.jit.trace(self.model, (dummy_x, dummy_edge, dummy_batch))
+            if use_gine:
+                dummy_edge_attr = torch.zeros(dummy_edge.shape[1], 4, dtype=torch.float, device=self.device)
+                self.model = torch.jit.trace(self.model, (dummy_x, dummy_edge, dummy_batch, dummy_edge_attr))
+            else:
+                self.model = torch.jit.trace(self.model, (dummy_x, dummy_edge, dummy_batch))
             self.model.eval()
         except Exception as e:
             print(f"Warning: Could not JIT compile model: {e}")
@@ -79,6 +87,7 @@ class GNNHeuristic:
         
         # Cache static graph structure (reused across all states in a level)
         self._edge_index: Optional[torch.Tensor] = None
+        self._edge_attr: Optional[torch.Tensor] = None
         self._floor_mask: Optional[List[int]] = None
         self._idx2nid: Optional[List[int]] = None  # cell_idx -> node_id (or -1)
         self._static_features: Optional[torch.Tensor] = None  # [is_goal, wall_up, wall_down, wall_left, wall_right]
@@ -105,9 +114,10 @@ class GNNHeuristic:
                 floor_mask.append(idx)
                 nid += 1
         
-        # Build edges (4-neighborhood)
+        # Build edges (4-neighborhood) + edge_attr: direction one-hot [up, down, left, right]
         src: List[int] = []
         dst: List[int] = []
+        eattr: List[List[float]] = []
         for idx in floor_mask:
             r, c = divmod(idx, W)
             for dr, dc in ((-1,0),(1,0),(0,-1),(0,1)):
@@ -118,7 +128,16 @@ class GNNHeuristic:
                     if nj >= 0:
                         src.append(idx2nid[idx])
                         dst.append(nj)
+                        if dr == -1 and dc == 0:
+                            eattr.append([1.0, 0.0, 0.0, 0.0])  # up
+                        elif dr == 1 and dc == 0:
+                            eattr.append([0.0, 1.0, 0.0, 0.0])  # down
+                        elif dr == 0 and dc == -1:
+                            eattr.append([0.0, 0.0, 1.0, 0.0])  # left
+                        else:
+                            eattr.append([0.0, 0.0, 0.0, 1.0])  # right
         edge_index = torch.tensor([src, dst], dtype=torch.long, device=self.device)
+        edge_attr = torch.tensor(eattr, dtype=torch.float, device=self.device)
         
         # Build static features (goal + directional walls)
         static_feats: List[List[float]] = []
@@ -132,6 +151,7 @@ class GNNHeuristic:
             static_feats.append([is_goal, up, down, left, right])
         
         self._edge_index = edge_index
+        self._edge_attr = edge_attr
         self._floor_mask = floor_mask
         self._idx2nid = idx2nid
         self._static_features = torch.tensor(static_feats, dtype=torch.float, device=self.device)
@@ -161,6 +181,8 @@ class GNNHeuristic:
         assert self._idx2nid is not None
         assert self._static_features is not None
         assert self._edge_index is not None
+        if getattr(self.model, "conv", "gin") == "gine":
+            assert self._edge_attr is not None
 
         n = len(self._floor_mask)
         if self._feature_buffer is None or self._feature_buffer.shape[0] != n:
@@ -187,7 +209,11 @@ class GNNHeuristic:
             self._feature_buffer[pnid, 2] = 1.0
         
         with torch.no_grad():
-            y_hat = self.model(self._feature_buffer, self._edge_index, self._batch_buffer)
+            if getattr(self.model, "conv", "gin") == "gine":
+                # Edge directions are implicit in the grid topology; we keep a static edge_attr in _edge_attr.
+                y_hat = self.model(self._feature_buffer, self._edge_index, self._batch_buffer, self._edge_attr)
+            else:
+                y_hat = self.model(self._feature_buffer, self._edge_index, self._batch_buffer)
             gnn_val = float(y_hat.view(-1)[0].item())
         
         gnn_est = max(0.0, float(gnn_val))

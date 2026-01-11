@@ -81,7 +81,7 @@ def main():
     in_dim = int(sample0.x.shape[1])
     args.in_dim = in_dim
 
-    model = GINHeuristic(in_dim=in_dim, hidden=args.hidden, layers=args.layers, dropout=args.dropout).to(device)
+    model = GINHeuristic(in_dim=in_dim, hidden=args.hidden, layers=args.layers, dropout=args.dropout, conv="gine").to(device)
     if args.init_model and (not (args.resume and os.path.exists(args.checkpoint))):
         if not os.path.exists(args.init_model):
             raise SystemExit(f"--init_model not found: {args.init_model}")

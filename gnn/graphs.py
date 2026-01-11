@@ -36,9 +36,10 @@ def grid_to_graph(state: State) -> Tuple[Data, Dict[int, int]]:
     if n == 0:
         raise ValueError("Empty graph: no floor cells")
 
-    # Build edges (4-neighborhood)
+    # Build edges (4-neighborhood) + simple edge features: direction one-hot [up, down, left, right]
     src: List[int] = []
     dst: List[int] = []
+    edge_attr: List[List[float]] = []
     for idx in floor_mask:
         r, c = divmod(idx, W)
         for dr, dc in ((-1,0),(1,0),(0,-1),(0,1)):
@@ -48,7 +49,16 @@ def grid_to_graph(state: State) -> Tuple[Data, Dict[int, int]]:
                 if j in idx2nid:  # neighbor is also floor
                     src.append(idx2nid[idx])
                     dst.append(idx2nid[j])
+                    if dr == -1 and dc == 0:
+                        edge_attr.append([1.0, 0.0, 0.0, 0.0])  # up
+                    elif dr == 1 and dc == 0:
+                        edge_attr.append([0.0, 1.0, 0.0, 0.0])  # down
+                    elif dr == 0 and dc == -1:
+                        edge_attr.append([0.0, 0.0, 1.0, 0.0])  # left
+                    else:
+                        edge_attr.append([0.0, 0.0, 0.0, 1.0])  # right
     edge_index = torch.tensor([src, dst], dtype=torch.long)
+    edge_attr_t = torch.tensor(edge_attr, dtype=torch.float)
 
     # Node features
     feats: List[List[float]] = []
@@ -67,5 +77,5 @@ def grid_to_graph(state: State) -> Tuple[Data, Dict[int, int]]:
     x = torch.tensor(feats, dtype=torch.float)
 
     # Global target placeholder (filled by dataset): y: Tensor([target])
-    data = Data(x=x, edge_index=edge_index)
+    data = Data(x=x, edge_index=edge_index, edge_attr=edge_attr_t)
     return data, idx2nid

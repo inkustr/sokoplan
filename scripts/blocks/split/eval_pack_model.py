@@ -80,7 +80,14 @@ def _load_model(ckpt_path: str, device: torch.device) -> torch.nn.Module:
         raise RuntimeError(f"Invalid checkpoint format at {ckpt_path}: expected dict-like state_dict.")
     w0 = sd.get("convs.0.nn.net.0.weight")
     in_dim = int(w0.shape[1]) if isinstance(w0, torch.Tensor) and w0.ndim == 2 else int(cfg.get("in_dim", 7))
-    model = GINHeuristic(in_dim=in_dim, hidden=hidden, layers=layers, dropout=dropout).to(device)
+    use_gine = any(str(k).startswith("convs.0.lin.") for k in sd.keys())
+    model = GINHeuristic(
+        in_dim=in_dim,
+        hidden=hidden,
+        layers=layers,
+        dropout=dropout,
+        conv=("gine" if use_gine else "gin"),
+    ).to(device)
     model.load_state_dict(sd)
     model.eval()
     return model
@@ -100,7 +107,10 @@ def _iter_jsonl(path: str, limit: Optional[int] = None):
 _WORKER_MODEL: Optional[torch.nn.Module] = None
 _WORKER_DEVICE: Optional[torch.device] = None
 _WORKER_GRAPH_CACHE: Optional[
-    Dict[Tuple[int, int, int, int, int], Tuple[torch.Tensor, Dict[int, int], List[int], torch.Tensor]]
+    Dict[
+        Tuple[int, int, int, int, int],
+        Tuple[torch.Tensor, torch.Tensor, Dict[int, int], List[int], torch.Tensor],
+    ]
 ] = None
 
 
@@ -148,9 +158,10 @@ def _eval_record(rec: dict) -> Tuple[str, float, float]:
         static_x[:, 1] = 0.0
         static_x[:, 2] = 0.0
         edge_index = data.edge_index.to(_WORKER_DEVICE)
-        _WORKER_GRAPH_CACHE[key] = (edge_index, idx2nid, floor_idxs, static_x)
+        edge_attr = data.edge_attr.to(_WORKER_DEVICE)
+        _WORKER_GRAPH_CACHE[key] = (edge_index, edge_attr, idx2nid, floor_idxs, static_x)
 
-    edge_index, idx2nid, floor_idxs, static_x = _WORKER_GRAPH_CACHE[key]
+    edge_index, edge_attr, idx2nid, floor_idxs, static_x = _WORKER_GRAPH_CACHE[key]
     x = static_x.clone()
     for nid, idx_cell in enumerate(floor_idxs):
         if s.has_box(idx_cell):
@@ -162,7 +173,7 @@ def _eval_record(rec: dict) -> Tuple[str, float, float]:
     x = x.to(_WORKER_DEVICE)
     batch = torch.zeros(x.size(0), dtype=torch.long, device=_WORKER_DEVICE)
     with torch.no_grad():
-        y_hat = _WORKER_MODEL(x, edge_index, batch).view(-1)[0].item()
+        y_hat = _WORKER_MODEL(x, edge_index, batch, edge_attr).view(-1)[0].item()
     yhat = float(max(0.0, y_hat))
     return level_id, y, yhat
 

@@ -29,13 +29,13 @@ def train_once(model, loader, opt, device, *, amp: bool = False, scaler=None):
             except Exception:
                 autocast_ctx = torch.cuda.amp.autocast()
             with autocast_ctx:
-                pred = model(batch.x, batch.edge_index, batch.batch)
+                pred = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
                 loss = huber_loss(pred, batch.y.view(-1))
             scaler.scale(loss).backward()
             scaler.step(opt)
             scaler.update()
         else:
-            pred = model(batch.x, batch.edge_index, batch.batch)
+            pred = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
             loss = huber_loss(pred, batch.y.view(-1))
             loss.backward()
             opt.step()
@@ -58,10 +58,10 @@ def eval_once(model, loader, device, *, amp: bool = False):
                 except Exception:
                     autocast_ctx = torch.cuda.amp.autocast()
                 with autocast_ctx:
-                    pred = model(batch.x, batch.edge_index, batch.batch)
+                    pred = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
                     loss = huber_loss(pred, batch.y.view(-1))
             else:
-                pred = model(batch.x, batch.edge_index, batch.batch)
+                pred = model(batch.x, batch.edge_index, batch.batch, batch.edge_attr)
                 loss = huber_loss(pred, batch.y.view(-1))
             total += float(loss.item()) * batch.num_graphs
             n += batch.num_graphs
