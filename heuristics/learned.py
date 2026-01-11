@@ -64,7 +64,7 @@ class GNNHeuristic:
         self.model.eval().to(self.device)
 
         try:
-            dummy_x = torch.randn(10, 4, device=self.device)
+            dummy_x = torch.randn(10, int(in_dim), device=self.device)
             dummy_edge = torch.tensor([[0, 1, 2], [1, 2, 0]], dtype=torch.long, device=self.device)
             dummy_batch = torch.zeros(10, dtype=torch.long, device=self.device)
             self.model = torch.jit.trace(self.model, (dummy_x, dummy_edge, dummy_batch))
