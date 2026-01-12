@@ -51,19 +51,20 @@ class GNNHeuristic:
                 max_conv_idx = idx
         layers = (max_conv_idx + 1) if max_conv_idx >= 0 else 4
 
-        # Infer hidden size / input feature dim from "convs.0.nn.net.0.weight": shape [hidden, in_dim]
         hidden = 128
         in_dim = 7
         w0 = sd.get("convs.0.nn.net.0.weight")
+        if not isinstance(w0, torch.Tensor):
+            w0 = sd.get("convs.0.nn.0.weight")
         if isinstance(w0, torch.Tensor) and w0.ndim == 2 and w0.shape[0] > 0:
             hidden = int(w0.shape[0])
             in_dim = int(w0.shape[1])
 
-        # Infer whether checkpoint was trained with edge-aware convs (GINEConv).
-        # PyG stores the edge encoder as "convs.<i>.lin.weight" when edge_dim is used.
-        use_gine = any(str(k).startswith("convs.0.lin.") for k in sd.keys())
-
-        self.model = GINHeuristic(in_dim=in_dim, hidden=hidden, layers=layers, conv=("gine" if use_gine else "gin"))
+        self.model = GINHeuristic(
+            in_dim=in_dim,
+            hidden=hidden,
+            layers=layers,
+        )
         self.model.load_state_dict(sd)
         self.model.eval().to(self.device)
 
@@ -71,11 +72,8 @@ class GNNHeuristic:
             dummy_x = torch.randn(10, int(in_dim), device=self.device)
             dummy_edge = torch.tensor([[0, 1, 2], [1, 2, 0]], dtype=torch.long, device=self.device)
             dummy_batch = torch.zeros(10, dtype=torch.long, device=self.device)
-            if use_gine:
-                dummy_edge_attr = torch.zeros(dummy_edge.shape[1], 4, dtype=torch.float, device=self.device)
-                self.model = torch.jit.trace(self.model, (dummy_x, dummy_edge, dummy_batch, dummy_edge_attr))
-            else:
-                self.model = torch.jit.trace(self.model, (dummy_x, dummy_edge, dummy_batch))
+            dummy_edge_attr = torch.zeros(dummy_edge.shape[1], 4, dtype=torch.float, device=self.device)
+            self.model = torch.jit.trace(self.model, (dummy_x, dummy_edge, dummy_batch, dummy_edge_attr))
             self.model.eval()
         except Exception as e:
             print(f"Warning: Could not JIT compile model: {e}")
@@ -181,8 +179,7 @@ class GNNHeuristic:
         assert self._idx2nid is not None
         assert self._static_features is not None
         assert self._edge_index is not None
-        if getattr(self.model, "conv", "gin") == "gine":
-            assert self._edge_attr is not None
+        assert self._edge_attr is not None
 
         n = len(self._floor_mask)
         if self._feature_buffer is None or self._feature_buffer.shape[0] != n:
@@ -209,11 +206,7 @@ class GNNHeuristic:
             self._feature_buffer[pnid, 2] = 1.0
         
         with torch.no_grad():
-            if getattr(self.model, "conv", "gin") == "gine":
-                # Edge directions are implicit in the grid topology; we keep a static edge_attr in _edge_attr.
-                y_hat = self.model(self._feature_buffer, self._edge_index, self._batch_buffer, self._edge_attr)
-            else:
-                y_hat = self.model(self._feature_buffer, self._edge_index, self._batch_buffer)
+            y_hat = self.model(self._feature_buffer, self._edge_index, self._batch_buffer, self._edge_attr)
             gnn_val = float(y_hat.view(-1)[0].item())
         
         gnn_est = max(0.0, float(gnn_val))

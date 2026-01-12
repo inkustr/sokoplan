@@ -2,13 +2,13 @@
 #SBATCH --job-name=soko_train
 #SBATCH --output=logs/train_%j.out
 #SBATCH --error=logs/train_%j.err
-#SBATCH --time=05:00:00
-#SBATCH --partition=gpu-5h
+#SBATCH --time=2-00:00:00
+#SBATCH --partition=gpu-2d
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
 #SBATCH --gpus-per-node=1
-#SBATCH --constraint="80gb"
+#SBATCH --constraint="80gb|40gb|h100|mig40"
 
 mkdir -p logs
 mkdir -p artifacts
@@ -26,22 +26,23 @@ echo "GPU: $CUDA_VISIBLE_DEVICES"
 echo "Python: $(which python3)"
 
 # Training parameters
-TRAIN_DATA="${TRAIN_DATA:-data/train_labels.jsonl}"
-VAL_DATA="${VAL_DATA:-data/val_labels.jsonl}"
+TRAIN_DATA="${TRAIN_DATA:-data/group_002/train.jsonl}"
+VAL_DATA="${VAL_DATA:-data/group_002/val.jsonl}"
 INIT_MODEL="${INIT_MODEL:-}"
 # INIT_MODEL="${INIT_MODEL:-artifacts/gnn_best_5e.pt}"
-OUTPUT_MODEL="${OUTPUT_MODEL:-artifacts/gnn_best_${SLURM_JOB_ID}.pt}"
-CHECKPOINT="${CHECKPOINT:-artifacts/gnn_checkpoint_${SLURM_JOB_ID}.pt}"
-EPOCHS="${EPOCHS:-7}"
+OUTPUT_MODEL="${OUTPUT_MODEL:-artifacts/group_002/group_002_${SLURM_JOB_ID}.pt}"
+CHECKPOINT="${CHECKPOINT:-artifacts/group_002/group_002_checkpoint_${SLURM_JOB_ID}.pt}"
+EPOCHS="${EPOCHS:-200}"
 BATCH="${BATCH:-2048}"
 HIDDEN="${HIDDEN:-128}"
-LAYERS="${LAYERS:-5}"
-LR="${LR:-5e-4}"
+LAYERS="${LAYERS:-4}"
+LR="${LR:-1e-4}"
 DROPOUT="${DROPOUT:-0.1}"
 WORKERS="${WORKERS:-12}"
 PREFETCH="${PREFETCH:-4}"
 TORCH_THREADS="${TORCH_THREADS:-1}"
 AMP="${AMP:-1}"
+TEMP_FOLDER="${TEMP_FOLDER:-artifacts/group_002/temp_${SLURM_JOB_ID}}"
 
 # Check if training data exists
 if [ ! -f "$TRAIN_DATA" ]; then
@@ -93,6 +94,12 @@ if [ -n "${INIT_MODEL}" ]; then
   fi
 fi
 
+TEMP_FLAG=""
+if [ -n "${TEMP_FOLDER}" ]; then
+  TEMP_FLAG="--temp_folder ${TEMP_FOLDER}"
+  mkdir -p "$TEMP_FOLDER"
+fi
+
 # Run training with checkpoint support
 python3 -m scripts.train_gnn \
     --train "$LOCAL_TRAIN" \
@@ -113,6 +120,7 @@ python3 -m scripts.train_gnn \
     --out "$OUTPUT_MODEL" \
     --checkpoint "$CHECKPOINT" \
     --resume
+    $TEMP_FLAG
 
 echo "Training finished. Model saved to $OUTPUT_MODEL"
 echo "To resume if interrupted, resubmit this job - it will continue from the last checkpoint."

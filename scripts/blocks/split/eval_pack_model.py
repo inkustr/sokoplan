@@ -79,6 +79,8 @@ def _load_model(ckpt_path: str, device: torch.device) -> torch.nn.Module:
     if not isinstance(sd, dict):
         raise RuntimeError(f"Invalid checkpoint format at {ckpt_path}: expected dict-like state_dict.")
     w0 = sd.get("convs.0.nn.net.0.weight")
+    if not isinstance(w0, torch.Tensor):
+        w0 = sd.get("convs.0.nn.0.weight")
     in_dim = int(w0.shape[1]) if isinstance(w0, torch.Tensor) and w0.ndim == 2 else int(cfg.get("in_dim", 7))
     use_gine = any(str(k).startswith("convs.0.lin.") for k in sd.keys())
     model = GINHeuristic(
