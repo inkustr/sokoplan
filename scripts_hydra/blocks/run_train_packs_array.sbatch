@@ -85,7 +85,7 @@ for i in "${!FILES[@]}"; do
     --pin_memory \
     --persistent_workers \
     --torch_threads "$TORCH_THREADS" \
-    $AMP_FLAG \
+    $( [ "$AMP" = "1" ] && echo "--amp" ) \
     --out "$OUT_PATH"
 
   count=$((count + 1))

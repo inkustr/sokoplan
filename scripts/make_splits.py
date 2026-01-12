@@ -17,10 +17,23 @@ def write_list(path: str, items: List[str]) -> None:
         for it in items:
             f.write(it + "\n")
 
+def _read_id_list(path: str) -> List[str]:
+    with open(path, "r", encoding="utf-8") as f:
+        return [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
+
 
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--config", type=str, default="configs/data.yaml")
+    p.add_argument(
+        "--input_list",
+        type=str,
+        default="",
+        help=(
+            "Optional: path to an existing .list file containing level_ids (one per line). "
+            "If provided, splits will be made from this list (IDs are preserved exactly)."
+        ),
+    )
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--train", type=int, default=2000, help="how many levels in train")
     p.add_argument("--val", type=int, default=200, help="how many levels in val")
@@ -35,13 +48,16 @@ def main():
     flt  = cfg.get("filters", {})
 
     all_ids: List[str] = []
-    for ref, s in iterate_level_strings(root, rels):
-        if filter_level(s,
-                        max_w=flt.get("max_width"),
-                        max_h=flt.get("max_height"),
-                        min_b=flt.get("min_boxes"),
-                        max_b=flt.get("max_boxes")):
-            all_ids.append(f"{ref.path}#{ref.index}")
+    if args.input_list:
+        all_ids = _read_id_list(args.input_list)
+    else:
+        for ref, s in iterate_level_strings(root, rels):
+            if filter_level(s,
+                            max_w=flt.get("max_width"),
+                            max_h=flt.get("max_height"),
+                            min_b=flt.get("min_boxes"),
+                            max_b=flt.get("max_boxes")):
+                all_ids.append(f"{ref.path}#{ref.index}")
 
     rng = random.Random(args.seed)
     rng.shuffle(all_ids)

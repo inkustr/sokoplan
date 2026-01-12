@@ -297,6 +297,90 @@ def plot_sorted_runtime_curves(
     _savefig(os.path.join(out_dir, "09_sorted_runtime_curves.png"))
 
 
+def plot_solution_len_scatter(
+    common: List[str],
+    gnn: Dict[str, Row],
+    hun: Dict[str, Row],
+    out_dir: str,
+) -> None:
+    """
+    Compare solution lengths on levels where both methods succeeded.
+    Hungarian is treated as the reference baseline.
+    """
+    xs, ys = [], []
+    for lid in common:
+        gr, hr = gnn[lid], hun[lid]
+        if not (gr.success and hr.success):
+            continue
+        if gr.solution_len < 0 or hr.solution_len < 0:
+            continue
+        xs.append(float(hr.solution_len))
+        ys.append(float(gr.solution_len))
+
+    if not xs:
+        return
+
+    plt.figure(figsize=(6.5, 6.5))
+    plt.scatter(xs, ys, s=24, alpha=0.85, color="#1f77b4", edgecolors="none")
+    lim = max(max(xs), max(ys)) * 1.1
+    plt.plot([0, lim], [0, lim], "--", color="black", linewidth=1, label="equal length")
+    plt.xlabel("Hungarian solution length (pushes)")
+    plt.ylabel("GNN solution length (pushes)")
+    plt.title("Solution length per level (both succeeded)")
+    plt.legend(loc="upper left", frameon=True)
+    _savefig(os.path.join(out_dir, "10_solution_len_scatter.png"))
+
+
+def plot_solution_len_ratio_hist_cdf(
+    common: List[str],
+    gnn: Dict[str, Row],
+    hun: Dict[str, Row],
+    out_dir: str,
+) -> None:
+    """
+    Distribution of "how much worse" GNN is in solution length vs Hungarian on levels
+    where both methods succeeded:
+
+      worse_pct = (gnn_len / hun_len - 1) * 100
+
+    (0% => equal length; 10% => GNN solution is 10% longer)
+    """
+    worse_pcts: List[float] = []
+    for lid in common:
+        gr, hr = gnn[lid], hun[lid]
+        if not (gr.success and hr.success):
+            continue
+        if gr.solution_len <= 0 or hr.solution_len <= 0:
+            continue
+        ratio = float(gr.solution_len) / float(hr.solution_len)
+        worse_pcts.append((ratio - 1.0) * 100.0)
+
+    if not worse_pcts:
+        return
+
+    w = np.array(worse_pcts, dtype=float)
+
+    # Histogram of percent worse, centered at 0 (0 => equal)
+    plt.figure(figsize=(7, 4))
+    plt.hist(w, bins=30, color="#1f77b4", alpha=0.9)
+    plt.axvline(0.0, color="black", linewidth=1)
+    plt.xlabel("Percent worse vs Hungarian: (GNN_len / Hungarian_len - 1) * 100%")
+    plt.ylabel("levels")
+    plt.title("Solution length: % worse distribution (both succeeded)")
+    _savefig(os.path.join(out_dir, "11_solution_len_worse_pct_hist.png"))
+
+    # CDF of percent worse
+    plt.figure(figsize=(7, 4))
+    xs = np.sort(w)
+    ys = np.linspace(0.0, 1.0, len(xs), endpoint=True)
+    plt.plot(xs, ys, color="#1f77b4")
+    plt.axvline(0.0, color="black", linewidth=1, linestyle="--")
+    plt.xlabel("Percent worse vs Hungarian")
+    plt.ylabel("CDF")
+    plt.title("Solution length: % worse CDF (both succeeded)")
+    _savefig(os.path.join(out_dir, "12_solution_len_worse_pct_cdf.png"))
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description="Plot GNN vs Hungarian evaluation CSV comparisons.")
     p.add_argument("--gnn_csv", required=True)
@@ -319,6 +403,8 @@ def main() -> None:
     plot_node_ratio_vs_time_ratio(common, gnn, hun, args.out_dir)
     plot_per_node_cost(common, gnn, hun, args.out_dir)
     plot_sorted_runtime_curves(common, gnn, hun, args.out_dir)
+    plot_solution_len_scatter(common, gnn, hun, args.out_dir)
+    plot_solution_len_ratio_hist_cdf(common, gnn, hun, args.out_dir)
 
     print(f"wrote plots → {args.out_dir}")
 
