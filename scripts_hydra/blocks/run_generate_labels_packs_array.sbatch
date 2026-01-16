@@ -100,7 +100,7 @@ for LIST_PATH in "${ASSIGNED_LISTS[@]}"; do
   echo "Out    : $OUT_PATH"
   echo "================================================"
 
-  python3 -m scripts.generate_labels_festival \
+  python3 -m scripts.labels.generate_labels_festival \
     --list "$LIST_PATH" \
     --out "$OUT_PATH" \
     --time_limit "$TIME_LIMIT" \

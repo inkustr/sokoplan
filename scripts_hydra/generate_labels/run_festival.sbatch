@@ -31,7 +31,7 @@ mkdir -p data/generated_labels
 
 OUTPUT_FILE="data/generated_labels/labels_festival_part_${SHARD_IDX}.jsonl"
 
-python3 -m scripts.generate_labels_festival \
+python3 -m scripts.labels.generate_labels_festival \
     --list "sokoban_core/levels/splits/train.txt" \
     --out "$OUTPUT_FILE" \
     --time_limit 28800 \

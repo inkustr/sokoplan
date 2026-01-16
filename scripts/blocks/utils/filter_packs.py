@@ -17,7 +17,8 @@ Example usage:
   python -m scripts.blocks.utils.filter_packs \
     --config configs/data.yaml \
     --pack_subdir windows \
-    --out_dir sokoban_core/levels/packs_filtered
+    --out_dir sokoban_core/levels/packs_filtered \
+    --min_levels 20
 """
 
 import argparse
@@ -80,6 +81,12 @@ def main() -> None:
     p.add_argument("--config", default="configs/data.yaml")
     p.add_argument("--pack_subdir", default="windows")
     p.add_argument("--out_dir", default="sokoban_core/levels/packs_filtered")
+    p.add_argument(
+        "--min_levels",
+        type=int,
+        default=20,
+        help="Skip writing packs that end up with fewer than this many valid levels after filtering.",
+    )
     args = p.parse_args()
 
     root_dir, flt = _read_filters(args.config)
@@ -103,6 +110,7 @@ def main() -> None:
     total_in = 0
     total_out = 0
     packs_written = 0
+    packs_skipped_small = 0
 
     for rel_pack_dir in pack_dirs:
         pack_name = os.path.basename(rel_pack_dir)
@@ -130,6 +138,9 @@ def main() -> None:
 
         if not valid_levels:
             continue
+        if len(valid_levels) < int(args.min_levels):
+            packs_skipped_small += 1
+            continue
 
         out_pack_path = os.path.join(args.out_dir, f"{pack_name}.txt")
         _write_pack(out_pack_path, pack_name, valid_levels)
@@ -141,6 +152,7 @@ def main() -> None:
 
     print("\nDONE")
     print(f"packs_written: {packs_written}")
+    print(f"packs_skipped_small: {packs_skipped_small}")
     print(f"levels_in: {total_in}")
     print(f"levels_out: {total_out}")
 

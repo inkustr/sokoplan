@@ -38,7 +38,7 @@ echo "Running on node: $(hostname)"
 echo "Python: $(which python3)"
 
 # Run the command
-python3 -m scripts.generate_labels \
+python3 -m scripts.labels.generate_labels \
     --list "$INPUT_LIST" \
     --out "$OUTPUT_FILE" \
     --h hungarian \

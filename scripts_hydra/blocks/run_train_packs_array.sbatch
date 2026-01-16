@@ -72,7 +72,7 @@ for i in "${!FILES[@]}"; do
   echo "Out     : $OUT_PATH"
   echo "================================================"
 
-  python3 -m scripts.train_gnn \
+  python3 -m scripts.train.train_gnn \
     --train "$TRAIN_PATH" \
     --epochs "$EPOCHS" \
     --batch "$BATCH" \

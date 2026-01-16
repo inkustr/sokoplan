@@ -8,7 +8,7 @@ def test_generate_labels_smoke():
     if not os.path.exists(SPLIT):
         import pytest; pytest.skip("no split file yet")
 
-    from scripts.generate_labels import main as gen_main
+    from scripts.labels.generate_labels import main as gen_main
     import sys
     argv_bak = list(sys.argv)
     sys.argv = ["gen", "--list", SPLIT, "--out", OUT, "--use_dl"]

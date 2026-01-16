@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
 #SBATCH --gpus-per-node=1
-#SBATCH --constraint="80gb|40gb|h100|mig40"
+#SBATCH --constraint="80gb"
 
 mkdir -p logs
 mkdir -p artifacts
@@ -26,13 +26,13 @@ echo "GPU: $CUDA_VISIBLE_DEVICES"
 echo "Python: $(which python3)"
 
 # Training parameters
-TRAIN_DATA="${TRAIN_DATA:-data/group_002/train.jsonl}"
-VAL_DATA="${VAL_DATA:-data/group_002/val.jsonl}"
+TRAIN_DATA="${TRAIN_DATA:-data/boxoban_2/train.jsonl}"
+VAL_DATA="${VAL_DATA:-data/boxoban_2/val.jsonl}"
 INIT_MODEL="${INIT_MODEL:-}"
 # INIT_MODEL="${INIT_MODEL:-artifacts/gnn_best_5e.pt}"
-OUTPUT_MODEL="${OUTPUT_MODEL:-artifacts/group_002/group_002_${SLURM_JOB_ID}.pt}"
-CHECKPOINT="${CHECKPOINT:-artifacts/group_002/group_002_checkpoint_${SLURM_JOB_ID}.pt}"
-EPOCHS="${EPOCHS:-200}"
+OUTPUT_MODEL="${OUTPUT_MODEL:-artifacts/boxoban_2/boxoban_2_${SLURM_JOB_ID}.pt}"
+CHECKPOINT="${CHECKPOINT:-artifacts/boxoban_2/boxoban_2_checkpoint_${SLURM_JOB_ID}.pt}"
+EPOCHS="${EPOCHS:-30}"
 BATCH="${BATCH:-2048}"
 HIDDEN="${HIDDEN:-128}"
 LAYERS="${LAYERS:-4}"
@@ -42,7 +42,7 @@ WORKERS="${WORKERS:-12}"
 PREFETCH="${PREFETCH:-4}"
 TORCH_THREADS="${TORCH_THREADS:-1}"
 AMP="${AMP:-1}"
-TEMP_FOLDER="${TEMP_FOLDER:-artifacts/group_002/temp_${SLURM_JOB_ID}}"
+TEMP_FOLDER="${TEMP_FOLDER:-artifacts/boxoban_2/temp_${SLURM_JOB_ID}}"
 
 # Check if training data exists
 if [ ! -f "$TRAIN_DATA" ]; then
@@ -101,7 +101,7 @@ if [ -n "${TEMP_FOLDER}" ]; then
 fi
 
 # Run training with checkpoint support
-python3 -m scripts.train_gnn \
+python3 -m scripts.train.train_gnn \
     --train "$LOCAL_TRAIN" \
     ${LOCAL_VAL:+--val "$LOCAL_VAL"} \
     --epochs "$EPOCHS" \
@@ -119,8 +119,8 @@ python3 -m scripts.train_gnn \
     $( [ "$AMP" = "1" ] && echo "--amp" ) \
     --out "$OUTPUT_MODEL" \
     --checkpoint "$CHECKPOINT" \
-    --resume
-    $TEMP_FLAG
+    --resume \
+    --temp_folder "$TEMP_FOLDER"
 
 echo "Training finished. Model saved to $OUTPUT_MODEL"
 echo "To resume if interrupted, resubmit this job - it will continue from the last checkpoint."
