@@ -1,7 +1,8 @@
 from __future__ import annotations
 import argparse
 
-from sokoban_core.parser import parse_level_file, parse_level_str
+from sokoban_core.parser import parse_level_str
+from sokoban_core.levels.resolve import load_level_by_id
 from sokoban_core.render import render_ascii
 from sokoban_core.zobrist import Zobrist
 from search.astar import astar
@@ -9,24 +10,21 @@ from search.transposition import Transposition
 from heuristics.classic import h_zero, h_manhattan_hungarian, h_with_deadlocks
 from sokoban_core.goal_check import is_goal
 
-LVL = """
-#####
-#.@ #
-# $ #
-# . #
-#####
-"""
-
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--level", type=str, default="inline", help="path to .txt level or 'inline'")
+    p.add_argument(
+        "level_id",
+        nargs="?",
+        default=None,
+        help="Level id like 'path/to/pack.txt#idx'.",
+    )
     p.add_argument("--h", type=str, default="hungarian", choices=["zero", "hungarian", "hungarian+dl"], help="heuristic")
     args = p.parse_args()
 
-    if args.level == "inline":
-        s = parse_level_str(LVL)
+    if args.level_id is not None:
+        s = load_level_by_id(args.level_id)
     else:
-        s = parse_level_file(args.level)
+        raise ValueError("Level id is required")
 
     zob = Zobrist(s.width, s.height, s.board_mask)
     trans = Transposition(zob)
