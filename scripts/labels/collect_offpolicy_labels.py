@@ -38,6 +38,7 @@ from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count, current_process
 from typing import Dict, Iterable, List, Optional, Tuple
 from datetime import datetime
+from collections import Counter
 from tqdm import tqdm
 
 from sokoban_core.levels.resolve import load_level_by_id
@@ -385,6 +386,8 @@ def main() -> None:
     sampled: List[Tuple[str, Dict[str, int], bool]] = []  # (level_id, state_dict, is_offpolicy)
     seen_state_keys: set[str] = set()
     skipped_goal = 0
+    levels_with_no_samples = 0
+    sampleless_level_ids: List[str] = []
     sampling_jobs = args.jobs or cpu_count()
     if sampling_jobs <= 1:
         for lid in tqdm(level_ids, desc="Sampling states", unit="level"):
@@ -408,6 +411,10 @@ def main() -> None:
                 frontier_per_level=args.frontier_per_level,
                 seed=(args.seed ^ hash(lid)) & 0xFFFFFFFF,
             )
+            if (not args.include_start_solution) and len(samples) == 0:
+                levels_with_no_samples += 1
+                if len(sampleless_level_ids) < 20:
+                    sampleless_level_ids.append(lid)
             for smp in samples:
                 sd = state_to_dict(smp.state)
                 k = lid + "|" + json.dumps(sd, sort_keys=True)
@@ -444,6 +451,10 @@ def main() -> None:
                     if k0 not in seen_state_keys:
                         seen_state_keys.add(k0)
                         sampled.append((lid, sd0, False))
+                if (not args.include_start_solution) and len(state_dicts) == 0 and not int(skipped):
+                    levels_with_no_samples += 1
+                    if len(sampleless_level_ids) < 20:
+                        sampleless_level_ids.append(lid)
                 for sd in state_dicts:
                     k = lid + "|" + json.dumps(sd, sort_keys=True)
                     if k in seen_state_keys:
@@ -468,6 +479,7 @@ def main() -> None:
     ok = 0
     failed = 0
     wrote = 0
+    status_counts: Counter[str] = Counter()
     with open(args.out, "w", encoding="utf-8") as out:
         if jobs == 1:
             it: Iterable = map(_label_one_state, payload)
@@ -476,6 +488,7 @@ def main() -> None:
             it = pool.imap_unordered(_label_one_state, payload)
         try:
             for _, rec, status in tqdm(it, total=len(payload), desc="Festival labeling", unit="state"):
+                status_counts[status] += 1
                 if rec is None or not status.startswith("ok"):
                     failed += 1
                     continue
@@ -495,7 +508,17 @@ def main() -> None:
 
     print(f"levels_in_shard: {len(level_ids)} (skipped_goal={skipped_goal})")
     print(f"sampled_unique_states: {len(sampled)} (sample_per_level={args.sample_per_level})")
+    if (not args.include_start_solution) and levels_with_no_samples > 0:
+        print(
+            "WARNING: Some levels produced 0 sampled states and will have 0 labels in the output "
+            "(because --include_start_solution is not set).\n"
+            f"levels_with_no_samples: {levels_with_no_samples}/{len(level_ids)}\n"
+            f"sample_level_ids: {sampleless_level_ids}"
+        )
     print(f"festival_ok: {ok} festival_failed: {failed}")
+    if failed:
+        top = status_counts.most_common(10)
+        print("festival_status_top10:", top)
     print(f"wrote_records: {wrote} → {args.out}")
 
 
