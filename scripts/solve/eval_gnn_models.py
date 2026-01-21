@@ -14,16 +14,16 @@ Evaluate many GNN models and summarize results.
 Usage:
 
 Generate CSVs for all models:
-python -m scripts.eval.eval_gnn_models run --list sokoban_core/levels/splits_boxoban/temp.txt \
+python -m scripts.solve.eval_gnn_models run --list sokoban_core/levels/splits_boxoban/temp.txt \
   --models_dir artifacts/boxoban \
   --out_dir results/evaluate/boxoban \
   --mode speed \
   --ensure_hungarian \
-  --hungarian_csv results/evaluate/boxoban/hungarian.csv
+  --hungarian_csv results/evaluate/boxoban/hungarian.csv \
   --sort total_time_s (total_nodes, node_overhead_vs_hun, name)
 
 Summarize CSVs:
-python -m scripts.eval.eval_gnn_models summarize \
+python -m scripts.solve.eval_gnn_models summarize \
   --eval_dir results/evaluate/boxoban \
   --hungarian_csv results/evaluate/boxoban/hungarian.csv \
   --out results/evaluate/boxoban/models_summary.csv \
@@ -96,7 +96,7 @@ def cmd_run(args: argparse.Namespace) -> None:
                 [
                     args.python,
                     "-m",
-                    "scripts.run_batch",
+                    "scripts.solve.run_batch",
                     "--list",
                     args.list,
                     "--h",
@@ -123,7 +123,7 @@ def cmd_run(args: argparse.Namespace) -> None:
             [
                 args.python,
                 "-m",
-                "scripts.run_batch_gnn",
+                "scripts.solve.run_batch_gnn",
                 "--list",
                 args.list,
                 "--ckpt",
