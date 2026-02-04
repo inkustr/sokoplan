@@ -22,6 +22,8 @@ import csv
 import os
 import tempfile
 
+from tqdm import tqdm
+
 
 def _iter_pairs(pairs_path: str):
     with open(pairs_path, "r", encoding="utf-8") as f:
@@ -57,7 +59,8 @@ def main() -> None:
         w = csv.writer(f)
         w.writerow(["model_pack", "data_pack", "n", "mae", "mse", "rmse", "r2"])
 
-        for model_pack, data_pack in pairs:
+        desc = f"Cross-eval (shard {args.shard_idx + 1}/{args.num_shards})"
+        for model_pack, data_pack in tqdm(pairs, desc=desc, unit="pair"):
             ckpt = os.path.join(args.models_dir, f"{model_pack}_best.pt")
             labels = os.path.join(args.labels_dir, f"{data_pack}.jsonl")
             if not os.path.exists(ckpt) or not os.path.exists(labels):
