@@ -20,7 +20,7 @@ else
 fi
 
 # Must have a `lists/` subdir.
-PACKS_DIR="${PACKS_DIR:-sokoban_core/levels/packs_solved}"
+PACKS_DIR="${PACKS_DIR:-sokoban_core/levels/letslogic_filtered}"
 LISTS_DIR="${LISTS_DIR:-${PACKS_DIR}/lists}"
 
 OUT_DIR="${OUT_DIR:-data/packs_offpolicy_labels_festival}"
@@ -43,14 +43,15 @@ POLICY="${POLICY:-hungarian}"
 GNN_CKPT="${GNN_CKPT:-}"
 GNN_MODE="${GNN_MODE:-speed}"
 
-SAMPLE_PER_LEVEL="${SAMPLE_PER_LEVEL:-7}"
-FRONTIER_PER_LEVEL="${FRONTIER_PER_LEVEL:-3}"
-MIN_G="${MIN_G:-3}"
+SAMPLE_PER_LEVEL="${SAMPLE_PER_LEVEL:-10}"
+FRONTIER_PER_LEVEL="${FRONTIER_PER_LEVEL:-5}"
+MIN_G="${MIN_G:-4}"
 SEARCH_NODE_LIMIT="${SEARCH_NODE_LIMIT:-20000}"
 SEARCH_TIME_LIMIT="${SEARCH_TIME_LIMIT:-20.0}"
 
 FESTIVAL_TIMEOUT="${FESTIVAL_TIMEOUT:-1200}"
-SAMPLE_EVERY="${SAMPLE_EVERY:-4}"
+SAMPLE_EVERY="${SAMPLE_EVERY:-2}"
+START_SAMPLE_EVERY="${START_SAMPLE_EVERY:-1}"
 
 JOBS="${JOBS:-$SLURM_CPUS_PER_TASK}"
 
@@ -131,6 +132,7 @@ for LIST_PATH in "${ASSIGNED_LISTS[@]}"; do
     --list "$LIST_PATH" \
     --out "$OUT_PATH" \
     --policy "hungarian" \
+    --include_start_solution \
     --sample_per_level "$SAMPLE_PER_LEVEL" \
     --frontier_per_level "$FRONTIER_PER_LEVEL" \
     --min_g "$MIN_G" \
@@ -138,6 +140,7 @@ for LIST_PATH in "${ASSIGNED_LISTS[@]}"; do
     --search_time_limit "$SEARCH_TIME_LIMIT" \
     --festival_timeout "$FESTIVAL_TIMEOUT" \
     --sample_every "$SAMPLE_EVERY" \
+    --start_sample_every "$START_SAMPLE_EVERY" \
     --jobs "$JOBS"
 
   count=$((count + 1))

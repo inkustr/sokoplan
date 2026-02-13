@@ -50,7 +50,7 @@ def main() -> None:
 
     _ensure_dir(args.out_dir)
 
-    group_list_files = sorted([f for f in os.listdir(args.groups_lists_dir) if f.endswith(".list")])
+    group_list_files = sorted([f for f in os.listdir(args.groups_lists_dir)])
     if not group_list_files:
         raise SystemExit(f"No *.list found under: {args.groups_lists_dir}")
 

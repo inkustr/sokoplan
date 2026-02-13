@@ -14,12 +14,22 @@ python -m scripts.blocks.utils.filter_packs --config configs/data.yaml --pack_su
 sbatch scripts_hydra/blocks/run_generate_labels_packs_array.sbatch
 ```
 
-Filter by solved labels:
+### 1.1 Filter packs by solved labels
+Keep only levels that were successfully solved.
 ```bash
 python -m scripts.blocks.utils.filter_solved_by_labels \
     --packs_dir sokoban_core/levels/packs_filtered \
     --labels_dir data/packs_labels_festival \
     --out_dir sokoban_core/levels/packs_solved
+```
+
+### 1.2 Remap labels to new IDs
+Since filtering changed level indices, we must remap the `.jsonl` files to use the new `level_id`s from `packs_solved`.
+```bash
+python -m scripts.labels.remap_labels_to_solved \
+    --meta_dir sokoban_core/levels/packs_solved/meta \
+    --labels_in data/packs_offpolicy_labels_festival \
+    --labels_out data/packs_offpolicy_labels_festival_solved
 ```
 
 ## Step 2 — Train one small GNN per pack
@@ -41,11 +51,16 @@ Outputs:
 sbatch scripts_hydra/blocks/run_self_eval_packs_array.sbatch
 ```
 
-2) Create new list files based on per-level MAE:
+2) Create new list files based on per-level MAE (using auto_gap for balanced splits):
 
 ```bash
 source .venv/bin/activate
-python -m scripts.blocks.split.plan_splits --eval_dir results/packs_self_eval --out_lists_dir sokoban_core/levels/pack_blocks_2/lists --method top_pct --pct 0.2
+python -m scripts.blocks.split.plan_splits \
+    --eval_dir results/packs_self_eval \
+    --out_lists_dir sokoban_core/levels/pack_blocks/lists \
+    --method auto_gap \
+    --auto_gap_balance_power 0.5 \
+    --min_hard_levels 50
 ```
 
 ## Step 3.2 — Merge packs

@@ -8,7 +8,7 @@ from sokoban_core.levels.io import iterate_level_strings, filter_level
 Make splits from the levels in the config.
 
 Usage:
-  python -m scripts.make_splits --config configs/data.yaml --seed 42 --train 2000 --val 200 --test 200
+  python -m scripts.utils.make_splits --config configs/data.yaml --seed 42 --train 2000 --val 200 --test 200
 """
 
 def write_list(path: str, items: List[str]) -> None:
