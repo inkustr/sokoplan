@@ -63,12 +63,16 @@ def _dedup_key(rec: dict[str, Any], cfg: DedupConfig) -> tuple[Any, ...] | None:
     raise ValueError(f"Unknown dedup mode: {cfg.mode!r}")
 
 
-def _collect_pack_files(d: Path) -> dict[str, Path]:
-    if not d.exists():
+def _collect_pack_files(p: Path) -> dict[str, Path]:
+    if not p.exists():
         return {}
-    if not d.is_dir():
-        raise ValueError(f"Not a directory: {d}")
-    return {p.name: p for p in sorted(d.glob("*.jsonl")) if p.is_file()}
+    if p.is_file():
+        if p.suffix.lower() != ".jsonl":
+            raise ValueError(f"Expected .jsonl file, got: {p}")
+        return {p.name: p}
+    if p.is_dir():
+        return {x.name: x for x in sorted(p.glob("*.jsonl")) if x.is_file()}
+    raise ValueError(f"Not a file or directory: {p}")
 
 
 def _ensure_dir(p: Path) -> None:
@@ -128,19 +132,22 @@ def main() -> None:
         "--general_dir",
         type=Path,
         required=True,
-        help="Directory with general per-pack labels (*.jsonl).",
+        help="Directory with general per-pack labels (*.jsonl), or a single .jsonl file.",
     )
     ap.add_argument(
         "--offpolicy_dir",
         type=Path,
         required=True,
-        help="Directory with off-policy per-pack labels (*.jsonl).",
+        help="Directory with off-policy per-pack labels (*.jsonl), or a single .jsonl file.",
     )
     ap.add_argument(
         "--out_dir",
         type=Path,
         required=True,
-        help="Output directory for combined per-pack labels (*.jsonl).",
+        help=(
+            "Output directory for combined per-pack labels (*.jsonl). "
+            "If a .jsonl filepath is provided, exactly one combined file must be produced."
+        ),
     )
     ap.add_argument(
         "--dedup",
@@ -184,15 +191,35 @@ def main() -> None:
                 f"Only in offpolicy_dir ({offpolicy_dir}): {only_off[:10]}{' ...' if len(only_off) > 10 else ''}"
             )
 
-    _ensure_dir(out_dir)
+    out_is_file = out_dir.suffix.lower() == ".jsonl"
+    general_is_file = general_dir.exists() and general_dir.is_file()
+    offpolicy_is_file = offpolicy_dir.exists() and offpolicy_dir.is_file()
+
+    planned: list[tuple[str, Path | None, Path | None, Path]] = []
+    if out_is_file:
+        _ensure_dir(out_dir.parent)
+        # Special case: combine two explicit files even if their basenames differ.
+        if general_is_file or offpolicy_is_file:
+            planned = [("single", general_dir if general_is_file else None, offpolicy_dir if offpolicy_is_file else None, out_dir)]
+        else:
+            if len(all_names) != 1:
+                raise SystemExit(
+                    "--out_dir points to a .jsonl file, but multiple input pack files were found. "
+                    "Use an output directory instead."
+                )
+            name = all_names[0]
+            planned = [(name, gen_files.get(name), off_files.get(name), out_dir)]
+    else:
+        _ensure_dir(out_dir)
+        planned = [
+            (name, gen_files.get(name), off_files.get(name), out_dir / name)
+            for name in all_names
+        ]
 
     total_gen = 0
     total_off = 0
     total_out = 0
-    for name in all_names:
-        gp = gen_files.get(name)
-        op = off_files.get(name)
-        out_path = out_dir / name
+    for name, gp, op, out_path in planned:
         n_gen, n_off, n_written = combine_one(
             general_path=gp,
             offpolicy_path=op,

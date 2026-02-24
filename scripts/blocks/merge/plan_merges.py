@@ -1,58 +1,36 @@
 from __future__ import annotations
 
 """
-Plan merges from cross-evaluation results.
+Plan merges from cross-evaluation results using graph communities.
 
 Input:
   cross_eval.csv with columns: model_pack,data_pack,mae,mse,...
 
-Creates merge edges using following method:
-  - choose the ratio threshold automatically from the distribution of mutual pairs
-  - score(A,B) = max( mae(A on B)/self_mae[A], mae(B on A)/self_mae[B] )
-  - keep pairs with score <= quantile(score, q)
-
-Then compute connected components (union-find) and write group list files:
-  out_lists_dir/group_XXX.list
+Creates weighted undirected graph:
+  - score(A,B) = max( mae(A on B)/self_mae[A], mae(B on A)/self_mae[B] )  (lower is better)
+  - keep strong edges by global quantile + mutual-kNN filtering
+  - convert score -> affinity and run weighted label propagation
 
 Run:
     python -m scripts.blocks.merge.plan_merges \
     --cross_eval results/cross_eval.csv \
     --self_eval_dir results/packs_self_eval \
-    --ratio_quantile 0.10 --offset 2.0 --max_degree 4 \
-    --packs_lists_dir sokoban_core/levels/pack_groups/lists \
-    --out_lists_dir sokoban_core/levels/pack_groups_2/lists
+    -- knn 0 \
+    --affinity_temperature 0.5 \
+    --community_max_iter 50 \
+    --seed 42 \
+    --min_group_size 1 \
+    --allow_missing_lists
 """
 
 import argparse
 import csv
 import os
 import json
-from typing import Dict, List, Tuple, Optional
-
-
-class DSU:
-    def __init__(self) -> None:
-        self.parent: Dict[str, str] = {}
-        self.rank: Dict[str, int] = {}
-
-    def find(self, x: str) -> str:
-        if x not in self.parent:
-            self.parent[x] = x
-            self.rank[x] = 0
-            return x
-        if self.parent[x] != x:
-            self.parent[x] = self.find(self.parent[x])
-        return self.parent[x]
-
-    def union(self, a: str, b: str) -> None:
-        ra, rb = self.find(a), self.find(b)
-        if ra == rb:
-            return
-        if self.rank[ra] < self.rank[rb]:
-            ra, rb = rb, ra
-        self.parent[rb] = ra
-        if self.rank[ra] == self.rank[rb]:
-            self.rank[ra] += 1
+import math
+import random
+from collections import defaultdict
+from typing import Dict, List, Tuple, Optional, Set
 
 
 def _read_list(path: str) -> List[str]:
@@ -99,27 +77,87 @@ def _quantile(xs: List[float], q: float) -> float:
     return xs_sorted[max(0, min(len(xs_sorted) - 1, k))]
 
 
-def _select_edges_degree_limited(
+def _build_mutual_knn_edges(
     candidates: List[Tuple[float, str, str]],
-    max_degree: int,
-) -> List[Tuple[str, str]]:
+    packs: Set[str],
+    *,
+    knn: int,
+) -> List[Tuple[float, str, str]]:
     """
-    Greedy degree-limited edge selection.
-    candidates: (score, a, b) where a<b (undirected)
+    Keep only edges that are in top-k neighbors for both endpoints.
+    candidates: (score, a, b), lower score = better.
     """
-    if max_degree <= 0:
-        return [(a, b) for _, a, b in sorted(candidates)]
-    deg: Dict[str, int] = {}
-    picked: List[Tuple[str, str]] = []
-    for score, a, b in sorted(candidates, key=lambda t: t[0]):
-        da = deg.get(a, 0)
-        db = deg.get(b, 0)
-        if da >= max_degree or db >= max_degree:
-            continue
-        picked.append((a, b))
-        deg[a] = da + 1
-        deg[b] = db + 1
+    if knn <= 0:
+        return sorted(candidates, key=lambda t: t[0])
+
+    nbrs: Dict[str, List[Tuple[float, str]]] = {p: [] for p in packs}
+    for score, a, b in candidates:
+        nbrs[a].append((score, b))
+        nbrs[b].append((score, a))
+
+    topk: Dict[str, Set[str]] = {}
+    for p, vs in nbrs.items():
+        vs.sort(key=lambda x: x[0])
+        topk[p] = set([q for _, q in vs[:knn]])
+
+    picked: List[Tuple[float, str, str]] = []
+    for score, a, b in candidates:
+        if b in topk.get(a, set()) and a in topk.get(b, set()):
+            picked.append((score, a, b))
+    picked.sort(key=lambda t: t[0])
     return picked
+
+
+def _score_to_affinity(score: float, temperature: float) -> float:
+    # score around 1.0 means "same-quality transfer as self".
+    # larger score => weaker affinity.
+    t = max(1e-6, float(temperature))
+    return float(math.exp(-(score - 1.0) / t))
+
+
+def _weighted_label_propagation(
+    packs: Set[str],
+    weighted_edges: List[Tuple[str, str, float]],
+    *,
+    max_iter: int,
+    seed: int,
+) -> Dict[str, str]:
+    """
+    Weighted label propagation community detection.
+    Deterministic for fixed seed.
+    """
+    labels: Dict[str, str] = {p: p for p in packs}
+    adj: Dict[str, List[Tuple[str, float]]] = {p: [] for p in packs}
+    for a, b, w in weighted_edges:
+        adj[a].append((b, w))
+        adj[b].append((a, w))
+
+    rng = random.Random(int(seed))
+    nodes = sorted(packs)
+    for _ in range(max_iter):
+        changed = 0
+        order = nodes[:]
+        rng.shuffle(order)
+        for p in order:
+            if not adj[p]:
+                continue
+            acc: Dict[str, float] = defaultdict(float)
+            for q, w in adj[p]:
+                acc[labels[q]] += float(w)
+            if not acc:
+                continue
+            best_label = min(acc.keys())
+            best_w = acc[best_label]
+            for lab, tot_w in acc.items():
+                if tot_w > best_w or (tot_w == best_w and lab < best_label):
+                    best_label = lab
+                    best_w = tot_w
+            if labels[p] != best_label:
+                labels[p] = best_label
+                changed += 1
+        if changed == 0:
+            break
+    return labels
 
 
 def main() -> None:
@@ -132,19 +170,28 @@ def main() -> None:
         default="results/packs_self_eval",
         help="Directory with <pack>.json self-eval files.",
     )
-    p.add_argument("--ratio_quantile", type=float, default=0.10, help="Quantile for auto thresholding (lower → stricter merges).")
+    p.add_argument(
+        "--ratio_quantile",
+        type=float,
+        default=0.15,
+        help="Keep candidate edges with score <= quantile(scores, q). Lower = stricter.",
+    )
     p.add_argument(
         "--offset",
         type=float,
         default=2.0,
-        help="Additive slack for auto strategy (helps when self_mae is tiny).",
+        help="Deprecated (kept for CLI compatibility).",
     )
     p.add_argument(
         "--max_degree",
         type=int,
         default=4,
-        help="Limit merges per pack to avoid giant 'standardized' groups (0=unlimited).",
+        help="Deprecated (kept for CLI compatibility).",
     )
+    p.add_argument("--knn", type=int, default=6, help="Mutual-kNN filtering on candidate edge graph (0=disabled).")
+    p.add_argument("--affinity_temperature", type=float, default=0.5, help="Score->affinity temperature.")
+    p.add_argument("--community_max_iter", type=int, default=50, help="Max iterations for weighted label propagation.")
+    p.add_argument("--seed", type=int, default=42, help="Random seed for community detection.")
     p.add_argument(
         "--min_group_size",
         type=int,
@@ -182,10 +229,6 @@ def main() -> None:
     if not self_mae:
         raise SystemExit(f"self_eval_dir is empty or missing: {args.self_eval_dir}")
 
-    dsu = DSU()
-    for a in packs:
-        dsu.find(a)
-
     # Build undirected candidate edges with a numeric "merge score" (lower = better).
     # max( mae(A on B)/self_mae[A], mae(B on A)/self_mae[B] )
     eps = 1e-9
@@ -210,25 +253,30 @@ def main() -> None:
         rab = mab / max(sa, eps)
         rba = mba / max(sb, eps)
         score = max(rab, rba)  # symmetric
-        # auto: threshold later
         cand.append((score, aa, bb))
 
-    # auto: thresholding
-    auto_ratio_thr: Optional[float] = None
+    # Global thresholding
+    auto_ratio_thr: Optional[float]
     scores = [s for s, _, _ in cand]
     auto_ratio_thr = _quantile(scores, args.ratio_quantile)
     cand = [(s, a, b) for (s, a, b) in cand if s <= auto_ratio_thr]
 
-    # degree-limited selection to prevent large mega-groups
-    picked = _select_edges_degree_limited(cand, args.max_degree)
-    for a, b in picked:
-        dsu.union(a, b)
+    # Local filtering to suppress bridge chains.
+    picked = _build_mutual_knn_edges(cand, packs, knn=int(args.knn))
 
-    # connected components
-    comps: Dict[str, List[str]] = {}
-    for pck in packs:
-        root = dsu.find(pck)
-        comps.setdefault(root, []).append(pck)
+    # Weighted label propagation communities.
+    weighted_edges: List[Tuple[str, str, float]] = []
+    for score, a, b in picked:
+        weighted_edges.append((a, b, _score_to_affinity(score, float(args.affinity_temperature))))
+    labels = _weighted_label_propagation(
+        packs,
+        weighted_edges,
+        max_iter=int(args.community_max_iter),
+        seed=int(args.seed),
+    )
+    comps: Dict[str, List[str]] = defaultdict(list)
+    for pck, lab in labels.items():
+        comps[lab].append(pck)
 
     groups = [sorted(v) for v in comps.values() if len(v) >= args.min_group_size]
     groups.sort(key=len, reverse=True)
@@ -264,7 +312,8 @@ def main() -> None:
     print(f"auto_ratio_thr={auto_ratio_thr}")
     if missing_self:
         print(f"missing_self_eval_for={missing_self} mutual_pairs (skipped)")
-    print(f"picked_edges={len(picked)}")
+    print(f"candidates_after_quantile={len(cand)}")
+    print(f"picked_mutual_knn_edges={len(picked)}")
     print(f"groups_written={wrote}")
     if missing_lists:
         print(f"WARNING: missing_list_files={len(missing_lists)} (use correct --packs_lists_dir or omit --allow_missing_lists)")

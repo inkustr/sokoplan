@@ -1,35 +1,47 @@
 from __future__ import annotations
 
 """
-Plan per-pack splits from eval JSON produced by scripts.blocks.split.eval_pack_model.
+Plan multi-way per-pack splits from self-eval JSON files.
 
-Given per-level MAE inside a pack, produce 2 list files:
-  - <pack>_easy.list: levels with MAE <= threshold
-  - <pack>_hard.list: levels with MAE > threshold
+New default behavior:
+  - sort levels by per-level MAE (desc)
+  - recursively cut at statistically strong MAE gaps
+  - emit 1..N segments (not only easy/hard)
 
-These lists can be used as new "blocks" for next iteration label generation/training.
-
-Run:
-  source .venv/bin/activate
-  python -m scripts.blocks.split.plan_splits \
-    --eval_dir results/packs_self_eval \
-    --out_lists_dir sokoban_core/levels/pack_blocks/lists \
-    --method auto_gap
-
-Or with guards:
-python -m scripts.blocks.split.plan_splits \
-  --eval_dir results/packs_self_eval \
-  --out_lists_dir sokoban_core/levels/pack_blocks/lists \
-  --method auto_gap \
-  --auto_gap_balance_power 1.0 \
-  --auto_gap_min_hard_frac 0.05 \
-  --auto_gap_max_hard_frac 0.50
+This creates behavior-driven blocks without static map features.
 """
 
 import argparse
 import json
 import os
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
+
+
+@dataclass(frozen=True)
+class Item:
+    level_id: str
+    mae: float
+
+
+@dataclass(frozen=True)
+class SplitCandidate:
+    cut_idx: int
+    score: float
+    abs_gap: float
+    rel_gap: float
+
+
+def _quantile(xs: List[float], q: float) -> float:
+    if not xs:
+        return 0.0
+    ys = sorted(xs)
+    if q <= 0.0:
+        return float(ys[0])
+    if q >= 1.0:
+        return float(ys[-1])
+    k = int(round((len(ys) - 1) * q))
+    return float(ys[max(0, min(len(ys) - 1, k))])
 
 
 def _write_list(path: str, ids: List[str]) -> None:
@@ -38,133 +50,135 @@ def _write_list(path: str, ids: List[str]) -> None:
         for it in ids:
             f.write(it + "\n")
 
-def _auto_gap_split(
-    items_desc: List[Tuple[str, float]],
-    *,
-    min_hard: int,
-    min_easy: int,
-    min_hard_frac: float,
-    max_hard_frac: float,
-    balance_power: float,
-) -> List[str]:
-    """
-    Auto-select a hard split (top-k) by finding the largest MAE "gap" in the
-    descending-sorted list, while respecting minimum split sizes.
 
-    Returns the hard level_ids (top-k). If no valid split point exists, returns [].
+def _best_cut_for_segment(
+    items_desc: List[Item],
+    lo: int,
+    hi: int,
+    *,
+    min_segment_size: int,
+    min_abs_gap: float,
+    min_rel_gap: float,
+    balance_power: float,
+) -> Optional[SplitCandidate]:
+    n = hi - lo
+    if n < 2 * min_segment_size:
+        return None
+
+    best: Optional[SplitCandidate] = None
+    for k in range(lo + min_segment_size, hi - min_segment_size + 1):
+        left_mae = float(items_desc[k - 1].mae)
+        right_mae = float(items_desc[k].mae)
+        abs_gap = left_mae - right_mae
+        rel_gap = abs_gap / max(1e-9, abs(right_mae))
+        if min_abs_gap > 0.0 and abs_gap < min_abs_gap:
+            continue
+        if min_rel_gap > 0.0 and rel_gap < min_rel_gap:
+            continue
+
+        left_n = k - lo
+        right_n = hi - k
+        balance = float(min(left_n, right_n))
+        score = abs_gap * (balance**float(balance_power))
+        cand = SplitCandidate(cut_idx=k, score=float(score), abs_gap=float(abs_gap), rel_gap=float(rel_gap))
+        if best is None or cand.score > best.score:
+            best = cand
+    return best
+
+
+def _recursive_multi_gap_split(
+    items_desc: List[Item],
+    *,
+    min_segment_size: int,
+    min_abs_gap: float,
+    min_rel_gap: float,
+    balance_power: float,
+    max_segments: int,
+) -> List[Tuple[int, int]]:
+    """
+    Return segment boundaries over [0, len(items_desc)).
+    Greedy global recursion: at each step, split the segment with strongest valid gap.
     """
     n = len(items_desc)
-    if n <= 0:
-        return []
+    segments: List[Tuple[int, int]] = [(0, n)]
+    if n < 2 * min_segment_size:
+        return segments
 
-    # k is the size of hard set; it must allow at least min_easy remaining.
-    k_min = max(1, int(min_hard))
-    k_max = n - int(min_easy)
-    if k_min > k_max:
-        return []
+    while True:
+        if max_segments > 0 and len(segments) >= max_segments:
+            break
 
-    # items_desc are already sorted by mae desc: maes[i] >= maes[i+1]
-    best_k: Optional[int] = None
-    best_score: Optional[float] = None
-    for k in range(k_min, k_max + 1):
-        # split between k-1 and k (0-index): hard = [0..k-1], easy = [k..]
-        if k >= n:
-            continue
-        frac = k / max(1, n)
-        if min_hard_frac > 0.0 and frac < min_hard_frac:
-            continue
-        if max_hard_frac < 1.0 and frac > max_hard_frac:
-            continue
-        gap = items_desc[k - 1][1] - items_desc[k][1]
-        # Penalize tiny splits by preferring boundaries that separate sizeable groups.
-        # This keeps auto_gap from selecting an early huge jump caused by a handful of outliers.
-        balance = float(min(k, n - k))
-        score = float(gap) * (balance ** float(balance_power))
-        if best_score is None or score > best_score:
-            best_score = score
-            best_k = k
+        best_global: Optional[Tuple[int, SplitCandidate]] = None
+        for i, (lo, hi) in enumerate(segments):
+            cand = _best_cut_for_segment(
+                items_desc,
+                lo,
+                hi,
+                min_segment_size=min_segment_size,
+                min_abs_gap=min_abs_gap,
+                min_rel_gap=min_rel_gap,
+                balance_power=balance_power,
+            )
+            if cand is None:
+                continue
+            if best_global is None or cand.score > best_global[1].score:
+                best_global = (i, cand)
 
-    if best_k is None:
-        return []
-    return [lid for lid, _ in items_desc[:best_k]]
+        if best_global is None:
+            break
+
+        seg_idx, cand = best_global
+        lo, hi = segments[seg_idx]
+        left = (lo, cand.cut_idx)
+        right = (cand.cut_idx, hi)
+        segments = segments[:seg_idx] + [left, right] + segments[seg_idx + 1 :]
+
+    segments.sort(key=lambda x: x[0])
+    return segments
 
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--eval_dir", default="results/packs_self_eval", help="dir with <pack>.json from eval_pack_model")
+    p.add_argument("--eval_dir", default="results/packs_self_eval", help="Directory with <pack>.json from eval_pack_model.")
     p.add_argument("--out_lists_dir", default="sokoban_core/levels/pack_blocks/lists")
-    p.add_argument("--method", choices=["mae", "top_pct", "auto_gap"], default="top_pct")
-    p.add_argument("--mae_threshold", type=float, default=3.0)
-    p.add_argument("--pct", type=float, default=0.2, help="fraction of worst levels to mark as hard")
-    p.add_argument("--min_levels_to_split", type=int, default=50)
     p.add_argument(
-        "--min_hard_mae",
+        "--method",
+        choices=["multi_gap", "auto_gap"],
+        default="multi_gap",
+        help="multi_gap (new default) produces 1..N segments; auto_gap keeps the strongest single cut (legacy-like).",
+    )
+    p.add_argument("--min_levels_to_split", type=int, default=80)
+    p.add_argument("--min_segment_size", type=int, default=30, help="Minimum levels in each emitted segment.")
+    p.add_argument("--max_segments", type=int, default=0, help="0 = unlimited; otherwise cap segments per pack.")
+    p.add_argument(
+        "--gap_min_abs",
         type=float,
-        default=0.0,
-        help=(
-            "Extra guardrail: only split if the average MAE of the selected hard set is >= this value. "
-            "Useful with --method top_pct to avoid splitting 'good' packs just because they are large."
-        ),
+        default=-1.0,
+        help="Minimum MAE jump to accept a cut. Use <0 for auto-calibration from current eval set.",
     )
     p.add_argument(
-        "--min_hard_easy_gap",
+        "--gap_min_rel",
         type=float,
-        default=0.0,
-        help=(
-            "Extra guardrail: only split if mean(hard_mae) - mean(easy_mae) is >= this value. "
-            "Useful with --method top_pct to ensure there is a real hard tail."
-        ),
+        default=-1.0,
+        help="Minimum relative MAE jump to accept a cut. Use <0 for auto-calibration from current eval set.",
     )
     p.add_argument(
-        "--min_hard_levels",
-        type=int,
-        default=30,
-        help="Minimum number of levels in hard split (only used when splitting).",
-    )
-    p.add_argument(
-        "--min_easy_levels",
-        type=int,
-        default=30,
-        help="Minimum number of levels in easy split (only used when splitting).",
-    )
-    p.add_argument(
-        "--auto_gap_min_abs_gap",
+        "--auto_abs_quantile",
         type=float,
-        default=0.0,
-        help=(
-            "Only used with --method auto_gap. Require the chosen MAE jump at the split boundary "
-            "(mae[k-1] - mae[k]) to be >= this value, otherwise keep pack as-is."
-        ),
+        default=0.20,
+        help="If --gap_min_abs<0, use this quantile of best-cut absolute gaps across eligible packs.",
     )
     p.add_argument(
-        "--auto_gap_min_rel_gap",
+        "--auto_rel_quantile",
         type=float,
-        default=0.0,
-        help=(
-            "Only used with --method auto_gap. Require relative jump (mae[k-1]-mae[k]) / max(1e-9, mae[k]) "
-            "to be >= this value, otherwise keep pack as-is."
-        ),
+        default=0.50,
+        help="If --gap_min_rel<0, use this quantile of best-cut relative gaps across eligible packs.",
     )
     p.add_argument(
-        "--auto_gap_min_hard_frac",
-        type=float,
-        default=0.0,
-        help="Only used with --method auto_gap. Minimum fraction of levels to put in 'hard'.",
-    )
-    p.add_argument(
-        "--auto_gap_max_hard_frac",
+        "--gap_balance_power",
         type=float,
         default=1.0,
-        help="Only used with --method auto_gap. Maximum fraction of levels to put in 'hard'.",
-    )
-    p.add_argument(
-        "--auto_gap_balance_power",
-        type=float,
-        default=1.0,
-        help=(
-            "Only used with --method auto_gap. Objective is gap * balance^power, where balance=min(k,n-k). "
-            "Higher values penalize tiny hard tails more strongly."
-        ),
+        help="Cut objective is gap * balance^power; larger values penalize tiny tail splits.",
     )
     args = p.parse_args()
 
@@ -177,98 +191,92 @@ def main() -> None:
 
     os.makedirs(args.out_lists_dir, exist_ok=True)
 
-    splits = 0
-    kept = 0
-    skipped_by_guards = 0
+    pack_items: List[Tuple[str, List[Item]]] = []
     for fn in files:
         pack = os.path.splitext(fn)[0]
         path = os.path.join(args.eval_dir, fn)
         with open(path, "r", encoding="utf-8") as f:
             obj = json.load(f)
         per_level: Dict[str, Dict[str, float]] = obj.get("per_level", {})
-        items: List[Tuple[str, float]] = []
-        for level_id, m in per_level.items():
-            mae = float(m.get("mae", 0.0))
-            items.append((level_id, mae))
-
+        items = [Item(level_id=lid, mae=float(m.get("mae", 0.0))) for lid, m in per_level.items()]
         if not items:
-            # Nothing to write.
             continue
+        items.sort(key=lambda x: x.mae, reverse=True)
+        pack_items.append((pack, items))
 
-        items.sort(key=lambda x: x[1], reverse=True)
-        should_consider_split = len(items) >= args.min_levels_to_split
-        hard: List[str] = []
-        if should_consider_split:
-            if args.method == "mae":
-                hard = [lid for lid, mae in items if mae > args.mae_threshold]
-            elif args.method == "top_pct":
-                k = max(1, int(round(args.pct * len(items))))
-                hard = [lid for lid, _ in items[:k]]
-            else:
-                hard = _auto_gap_split(
-                    items,
-                    min_hard=args.min_hard_levels,
-                    min_easy=args.min_easy_levels,
-                    min_hard_frac=float(args.auto_gap_min_hard_frac),
-                    max_hard_frac=float(args.auto_gap_max_hard_frac),
-                    balance_power=float(args.auto_gap_balance_power),
-                )
-
-                # Optional extra "gap" requirements to avoid splitting on tiny/noisy elbows.
-                if hard:
-                    k = len(hard)
-                    # boundary is between k-1 and k (descending)
-                    if k < len(items):
-                        mae_prev = float(items[k - 1][1])
-                        mae_next = float(items[k][1])
-                        gap = mae_prev - mae_next
-                        rel_gap = gap / max(1e-9, abs(mae_next))
-                        if (args.auto_gap_min_abs_gap > 0.0 and gap < args.auto_gap_min_abs_gap) or (
-                            args.auto_gap_min_rel_gap > 0.0 and rel_gap < args.auto_gap_min_rel_gap
-                        ):
-                            hard = []
-
-        hard_set = set(hard)
-        easy = [lid for lid, _ in items if lid not in hard_set]
-
-        can_split = should_consider_split and (len(hard) >= args.min_hard_levels and len(easy) >= args.min_easy_levels)
-        if can_split and (args.min_hard_mae > 0.0 or args.min_hard_easy_gap > 0.0):
-            hard_maes = [mae for _, mae in items if _ in hard_set]
-            easy_maes = [mae for _, mae in items if _ not in hard_set]
-            mean_hard = sum(hard_maes) / max(1, len(hard_maes))
-            mean_easy = sum(easy_maes) / max(1, len(easy_maes))
-            gap = mean_hard - mean_easy
-            if (args.min_hard_mae > 0.0 and mean_hard < args.min_hard_mae) or (
-                args.min_hard_easy_gap > 0.0 and gap < args.min_hard_easy_gap
-            ):
-                can_split = False
-                skipped_by_guards += 1
-        if not can_split:
-            # Keep the pack as-is for the next iteration.
-            _write_list(os.path.join(args.out_lists_dir, f"{pack}.list"), sorted([lid for lid, _ in items]))
-            kept += 1
-            continue
-
-        _write_list(os.path.join(args.out_lists_dir, f"{pack}_easy.list"), sorted(easy))
-        _write_list(os.path.join(args.out_lists_dir, f"{pack}_hard.list"), sorted(hard))
-        splits += 1
-
-    if args.method == "top_pct" and args.min_hard_mae <= 0.0 and args.min_hard_easy_gap <= 0.0:
+    # Auto-calibrate thresholds from best available split in each eligible pack.
+    auto_abs = float(args.gap_min_abs)
+    auto_rel = float(args.gap_min_rel)
+    if auto_abs < 0.0 or auto_rel < 0.0:
+        abs_samples: List[float] = []
+        rel_samples: List[float] = []
+        for _, items in pack_items:
+            if len(items) < int(args.min_levels_to_split):
+                continue
+            cand = _best_cut_for_segment(
+                items,
+                0,
+                len(items),
+                min_segment_size=int(args.min_segment_size),
+                min_abs_gap=0.0,
+                min_rel_gap=0.0,
+                balance_power=float(args.gap_balance_power),
+            )
+            if cand is None:
+                continue
+            abs_samples.append(float(cand.abs_gap))
+            rel_samples.append(float(cand.rel_gap))
+        if auto_abs < 0.0:
+            auto_abs = _quantile(abs_samples, float(args.auto_abs_quantile))
+        if auto_rel < 0.0:
+            auto_rel = _quantile(rel_samples, float(args.auto_rel_quantile))
         print(
-            "NOTE: --method top_pct will split most sufficiently-large packs unless you add guardrails like "
-            "--min_hard_mae and/or --min_hard_easy_gap.",
+            f"auto thresholds: gap_min_abs={auto_abs:.6f} (q={args.auto_abs_quantile}), "
+            f"gap_min_rel={auto_rel:.6f} (q={args.auto_rel_quantile}), samples={len(abs_samples)}",
             flush=True,
         )
-    if args.method == "auto_gap" and args.auto_gap_min_abs_gap <= 0.0 and args.auto_gap_min_rel_gap <= 0.0:
-        print(
-            "NOTE: --method auto_gap chooses a split based on the largest MAE jump, but it may split even when the "
-            "jump is small. Consider adding --auto_gap_min_abs_gap and/or --auto_gap_min_rel_gap for stability.",
-            flush=True,
+
+    packs_kept = 0
+    packs_split = 0
+    total_segments = 0
+    for pack, items in pack_items:
+        if len(items) < int(args.min_levels_to_split):
+            _write_list(os.path.join(args.out_lists_dir, f"{pack}.list"), sorted([x.level_id for x in items]))
+            packs_kept += 1
+            total_segments += 1
+            continue
+
+        max_segments = int(args.max_segments)
+        if args.method == "auto_gap":
+            max_segments = 2
+
+        segs = _recursive_multi_gap_split(
+            items,
+            min_segment_size=int(args.min_segment_size),
+            min_abs_gap=float(auto_abs),
+            min_rel_gap=float(auto_rel),
+            balance_power=float(args.gap_balance_power),
+            max_segments=max_segments,
         )
-    print(f"wrote: splits={splits} kept={kept} skipped_by_guards={skipped_by_guards} → {args.out_lists_dir}")
+
+        if len(segs) <= 1:
+            _write_list(os.path.join(args.out_lists_dir, f"{pack}.list"), sorted([x.level_id for x in items]))
+            packs_kept += 1
+            total_segments += 1
+            continue
+
+        packs_split += 1
+        total_segments += len(segs)
+        for i, (lo, hi) in enumerate(segs):
+            seg_ids = sorted([x.level_id for x in items[lo:hi]])
+            out_name = f"{pack}_seg{i:02d}.list"
+            _write_list(os.path.join(args.out_lists_dir, out_name), seg_ids)
+
+    print(
+        f"wrote: packs_split={packs_split} packs_kept={packs_kept} total_output_segments={total_segments} "
+        f"-> {args.out_lists_dir}"
+    )
 
 
 if __name__ == "__main__":
     main()
-
-
