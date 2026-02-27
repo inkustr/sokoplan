@@ -1,0 +1,44 @@
+{
+    "meta": {
+      "time_limit": 180.0,
+      "node_limit": 2000000,
+      "jobs": 1,
+      "use_deadlocks": true,
+      "timestamp_unix": 1771976295,
+      "elapsed_s": 7928.622487783432
+    },
+    "domains": {
+      "boxoban2_test": {
+        "list_path": "sokoban_core/levels/splits/splits_boxoban/test.txt",
+        "ckpt_path": "artifacts/boxoban/boxoban.pt",
+        "modes": {
+          "speed": {
+            "levels": 10000,
+            "success": 10000,
+            "success_rate": 1.0,
+            "total_time_s": 2535.604395866394,
+            "total_nodes": 2490848,
+            "time_per_node_ms": 1.0179683368340398,
+            "comparable_states": 5424437,
+            "hungarian_lt_gnn": 5108642,
+            "hungarian_eq_gnn": 11331,
+            "gnn_lt_hungarian": 304464,
+            "hungarian_lt_rate": 0.9417828983911142
+          },
+          "optimal_mix": {
+            "levels": 10000,
+            "success": 9997,
+            "success_rate": 0.9997,
+            "total_time_s": 30426.462919950485,
+            "total_nodes": 42694389,
+            "time_per_node_ms": 0.7126571812504563,
+            "comparable_states": 60855358,
+            "hungarian_lt_gnn": 60171890,
+            "hungarian_eq_gnn": 18582,
+            "gnn_lt_hungarian": 664886,
+            "hungarian_lt_rate": 0.9887689757736697
+          }
+        }
+      }
+    }
+  }
