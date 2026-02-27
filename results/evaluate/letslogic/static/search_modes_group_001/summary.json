@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "time_limit": 180.0,
+    "node_limit": 2000000,
+    "jobs": 1,
+    "use_deadlocks": true,
+    "timestamp_unix": 1771976295,
+    "elapsed_s": 7928.622487783432
+  },
+  "domains": {
+    "letslogic_all_test": {
+      "list_path": "sokoban_core/levels/splits/letslogic_all/test/letslogic.list",
+      "ckpt_path": "artifacts/letslogic/single_model/letslogic_single.pt",
+      "modes": {
+        "speed": {
+          "levels": 525,
+          "success": 487,
+          "success_rate": 0.9276190476190476,
+          "total_time_s": 10967.197475910187,
+          "total_nodes": 16883460,
+          "time_per_node_ms": 0.6495823412920211,
+          "comparable_states": 18307184,
+          "hungarian_lt_gnn": 17760390,
+          "hungarian_eq_gnn": 378,
+          "gnn_lt_hungarian": 546416,
+          "hungarian_lt_rate": 0.970132271571641
+        },
+        "optimal_mix": {
+          "levels": 525,
+          "success": 474,
+          "success_rate": 0.9028571428571428,
+          "total_time_s": 15170.936895608902,
+          "total_nodes": 19847598,
+          "time_per_node_ms": 0.764371431525815,
+          "comparable_states": 26723142,
+          "hungarian_lt_gnn": 26311303,
+          "hungarian_eq_gnn": 522,
+          "gnn_lt_hungarian": 411317,
+          "hungarian_lt_rate": 0.9845886759872773
+        }
+      }
+    }
+  }
+}
