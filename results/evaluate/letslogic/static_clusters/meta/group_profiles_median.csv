@@ -1,0 +1,13 @@
+group_id,n_levels,profile,board_cells:median,box_goal_min_mean:median,box_goal_lb_approx_per_box:median,box_goal_min_max:median,free_per_box:median,width:median,height:median,initial_pushes:median
+group_000,6826,"low height, low width, low initial_pushes, low board_cells",99.0000,1.3333,1.3333,3.0000,6.0000,10.0000,9.0000,3.0000
+group_001,5248,"low height, low width, low board_cells, low box_goal_min_max",70.0000,1.3333,1.3333,2.0000,7.0000,9.0000,8.0000,3.0000
+group_002,5104,"high height, high width, high board_cells, low initial_pushes",210.0000,2.5000,2.5000,5.0000,6.8153,15.0000,14.0000,8.0000
+group_003,4247,"high box_goal_min_max, high box_goal_min_mean, high box_goal_lb_approx_per_box, high width",252.0000,7.3333,7.3333,12.0000,10.1111,18.0000,15.0000,7.0000
+group_004,4007,"low width, low height, low board_cells, low box_goal_min_max",64.0000,1.2000,1.2000,2.0000,3.7500,8.0000,8.0000,3.0000
+group_005,3878,"low initial_pushes, low width, low board_cells, low height",140.0000,3.0000,3.0000,5.0000,9.5000,12.0000,11.0000,4.0000
+group_006,3386,"low box_goal_min_max, low box_goal_min_mean, low box_goal_lb_approx_per_box, high initial_pushes",121.0000,1.0000,1.0000,2.0000,3.0000,11.0000,11.0000,18.0000
+group_007,2711,"low box_goal_min_max, low board_cells, low width, low height",110.0000,2.0000,2.0000,3.0000,6.7500,11.0000,10.0000,8.0000
+group_008,2402,"high height, high width, high board_cells, low box_goal_min_mean",285.0000,1.2308,1.2308,3.0000,4.2614,18.0000,15.5000,8.0000
+group_009,1553,"high height, high width, high board_cells, high box_goal_min_max",280.0000,2.6000,2.6000,6.0000,6.6250,18.0000,16.0000,10.0000
+group_010,1463,"high initial_pushes, high height, high board_cells, high width",320.0000,3.1034,3.1034,6.0000,5.5000,19.0000,17.0000,52.0000
+group_011,315,"high box_goal_min_mean, high box_goal_lb_approx_per_box, high board_cells, high box_goal_min_max",720.0000,14.8056,14.8056,23.0000,29.9583,33.0000,24.0000,18.0000
