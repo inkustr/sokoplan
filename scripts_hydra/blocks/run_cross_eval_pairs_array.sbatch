@@ -2,12 +2,12 @@
 #SBATCH --job-name=soko_crosseval
 #SBATCH --output=logs/crosseval_%A_%a.out
 #SBATCH --error=logs/crosseval_%A_%a.err
-#SBATCH --time=5:00:00
-#SBATCH --partition=cpu-5h
+#SBATCH --time=2-00:00:00
+#SBATCH --partition=cpu-2d
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
-#SBATCH --array=0-34
+#SBATCH --array=0-49
 
 # Requires:
 #   results/merge_pairs.csv (build via scripts.blocks.build_merge_pairs)
@@ -25,7 +25,7 @@ PAIRS="${PAIRS:-results/merge_pairs.csv}"
 LABELS_DIR="${LABELS_DIR:-data/group_labels_festival}"
 MODELS_DIR="${MODELS_DIR:-artifacts/packs_models}"
 OUT_DIR="${OUT_DIR:-results/cross_eval}"
-NUM_SHARDS="${NUM_SHARDS:-35}"
+NUM_SHARDS="${NUM_SHARDS:-50}"
 SHARD_IDX="${SLURM_ARRAY_TASK_ID}"
 LIMIT_RECORDS="${LIMIT_RECORDS:-7000}"
 

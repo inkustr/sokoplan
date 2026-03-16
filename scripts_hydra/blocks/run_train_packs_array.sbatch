@@ -2,8 +2,8 @@
 #SBATCH --job-name=soko_train_packs
 #SBATCH --output=logs/train_packs_%A_%a.out
 #SBATCH --error=logs/train_packs_%A_%a.err
-#SBATCH --time=05:00:00
-#SBATCH --partition=gpu-5h
+#SBATCH --time=2-00:00:00
+#SBATCH --partition=gpu-2d
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
@@ -39,7 +39,7 @@ NUM_SHARDS="${NUM_SHARDS:-35}"
 SHARD_IDX="${SLURM_ARRAY_TASK_ID}"
 SHARD_STRATEGY="${SHARD_STRATEGY:-weighted}"  # weighted|mod
 
-EPOCHS="${EPOCHS:-15}"
+EPOCHS="${EPOCHS:-25}"
 BATCH="${BATCH:-512}"
 HIDDEN="${HIDDEN:-128}"
 LAYERS="${LAYERS:-4}"
