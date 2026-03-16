@@ -1,0 +1,27 @@
+{
+  "kept_original_indices": [
+    0,
+    3,
+    4,
+    5,
+    6,
+    7,
+    9,
+    10,
+    11,
+    17,
+    21,
+    22,
+    24,
+    25,
+    27
+  ],
+  "labels": "data/packs_offpolicy_labels_festival/0710_sbmendonca_modifications.jsonl",
+  "levels_dropped_no_labels": 16,
+  "levels_in_list": 31,
+  "levels_with_labels": 15,
+  "levels_written": 15,
+  "pack": "0710_sbmendonca_modifications",
+  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0710_sbmendonca_modifications.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0710_sbmendonca_modifications.txt"
+}

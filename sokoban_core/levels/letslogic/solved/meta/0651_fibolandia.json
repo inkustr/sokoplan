@@ -1,0 +1,15 @@
+{
+  "kept_original_indices": [
+    8,
+    9,
+    44
+  ],
+  "labels": "data/packs_offpolicy_labels_festival/0651_fibolandia.jsonl",
+  "levels_dropped_no_labels": 79,
+  "levels_in_list": 82,
+  "levels_with_labels": 3,
+  "levels_written": 3,
+  "pack": "0651_fibolandia",
+  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0651_fibolandia.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0651_fibolandia.txt"
+}

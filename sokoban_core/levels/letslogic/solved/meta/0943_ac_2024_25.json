@@ -1,0 +1,19 @@
+{
+  "kept_original_indices": [
+    0,
+    6,
+    7,
+    8,
+    29,
+    59,
+    63
+  ],
+  "labels": "data/packs_offpolicy_labels_festival/0943_ac_2024_25.jsonl",
+  "levels_dropped_no_labels": 60,
+  "levels_in_list": 67,
+  "levels_with_labels": 7,
+  "levels_written": 7,
+  "pack": "0943_ac_2024_25",
+  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0943_ac_2024_25.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0943_ac_2024_25.txt"
+}

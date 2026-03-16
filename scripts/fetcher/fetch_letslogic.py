@@ -33,7 +33,7 @@ except Exception:
 
 
 BASE_URL = "https://letslogic.com/api/v1"
-OUT_ROOT = Path("sokoban_core/levels/letslogic")
+OUT_ROOT = Path("sokoban_core/levels/letslogic/raw")
 
 
 TILE_MAP: Dict[str, str] = {

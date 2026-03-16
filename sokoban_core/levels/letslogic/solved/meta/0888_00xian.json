@@ -1,0 +1,33 @@
+{
+  "kept_original_indices": [
+    0,
+    1,
+    2,
+    3,
+    9,
+    10,
+    11,
+    13,
+    14,
+    15,
+    19,
+    29,
+    40,
+    56,
+    59,
+    61,
+    64,
+    81,
+    82,
+    88,
+    92
+  ],
+  "labels": "data/packs_offpolicy_labels_festival/0888_00xian.jsonl",
+  "levels_dropped_no_labels": 76,
+  "levels_in_list": 97,
+  "levels_with_labels": 21,
+  "levels_written": 21,
+  "pack": "0888_00xian",
+  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0888_00xian.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0888_00xian.txt"
+}

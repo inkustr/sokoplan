@@ -1,0 +1,33 @@
+{
+  "kept_original_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "labels": "data/packs_offpolicy_labels_festival/0621_numbered.jsonl",
+  "levels_dropped_no_labels": 0,
+  "levels_in_list": 21,
+  "levels_with_labels": 21,
+  "levels_written": 21,
+  "pack": "0621_numbered",
+  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0621_numbered.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0621_numbered.txt"
+}

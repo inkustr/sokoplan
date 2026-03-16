@@ -1,0 +1,33 @@
+{
+  "kept_original_indices": [
+    0,
+    1,
+    2,
+    4,
+    5,
+    8,
+    9,
+    12,
+    13,
+    16,
+    17,
+    20,
+    21,
+    24,
+    25,
+    28,
+    29,
+    32,
+    33,
+    36,
+    37
+  ],
+  "labels": "data/packs_offpolicy_labels_festival/0662_lines_of_wisdom_and_agony.jsonl",
+  "levels_dropped_no_labels": 19,
+  "levels_in_list": 40,
+  "levels_with_labels": 21,
+  "levels_written": 21,
+  "pack": "0662_lines_of_wisdom_and_agony",
+  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0662_lines_of_wisdom_and_agony.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0662_lines_of_wisdom_and_agony.txt"
+}

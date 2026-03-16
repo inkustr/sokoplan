@@ -1,0 +1,22 @@
+{
+  "kept_original_indices": [
+    0,
+    2,
+    28,
+    29,
+    30,
+    31,
+    32,
+    44,
+    45,
+    46
+  ],
+  "labels": "data/packs_offpolicy_labels_festival/0918_xs.jsonl",
+  "levels_dropped_no_labels": 48,
+  "levels_in_list": 58,
+  "levels_with_labels": 10,
+  "levels_written": 10,
+  "pack": "0918_xs",
+  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0918_xs.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0918_xs.txt"
+}

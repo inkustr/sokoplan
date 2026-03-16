@@ -1,0 +1,21 @@
+{
+  "kept_original_indices": [
+    4,
+    18,
+    41,
+    45,
+    47,
+    48,
+    49,
+    51,
+    60
+  ],
+  "labels": "data/packs_offpolicy_labels_festival/0980_kevin_collection_2.jsonl",
+  "levels_dropped_no_labels": 55,
+  "levels_in_list": 64,
+  "levels_with_labels": 9,
+  "levels_written": 9,
+  "pack": "0980_kevin_collection_2",
+  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0980_kevin_collection_2.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0980_kevin_collection_2.txt"
+}
