@@ -13,18 +13,23 @@
 
 set -euo pipefail
 mkdir -p logs
-mkdir -p results/packs_self_eval
 
-source .venv/bin/activate
+if [ -f ".venv/bin/activate" ]; then
+  source .venv/bin/activate
+else
+  echo ".venv not found in project root"
+  exit 1
+fi
 
 export CUDA_VISIBLE_DEVICES=""
 
-LABELS_DIR="${LABELS_DIR:-data/group_labels_festival}"
+LABELS_DIR="${LABELS_DIR:-data/packs_labels_festival}"
 MODELS_DIR="${MODELS_DIR:-artifacts/packs_models}"
 OUT_DIR="${OUT_DIR:-results/packs_self_eval}"
 NUM_SHARDS="${NUM_SHARDS:-50}"
 SHARD_IDX="${SLURM_ARRAY_TASK_ID}"
 LIMIT_RECORDS="${LIMIT_RECORDS:-0}"
+mkdir -p "$OUT_DIR"
 
 FILES=($(ls -1 "${LABELS_DIR}"/*.jsonl | sort))
 count=0

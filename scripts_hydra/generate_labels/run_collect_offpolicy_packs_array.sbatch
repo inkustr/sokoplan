@@ -131,7 +131,7 @@ for LIST_PATH in "${ASSIGNED_LISTS[@]}"; do
   python3 -m scripts.labels.collect_offpolicy_labels \
     --list "$LIST_PATH" \
     --out "$OUT_PATH" \
-    --policy "hungarian" \
+    --policy "$POLICY" \
     --include_start_solution \
     --sample_per_level "$SAMPLE_PER_LEVEL" \
     --frontier_per_level "$FRONTIER_PER_LEVEL" \

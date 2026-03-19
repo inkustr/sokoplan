@@ -9,7 +9,9 @@
 #SBATCH --mem=8G
 #SBATCH --array=0-49
 
-# Create logs directory if it doesn't exist
+set -euo pipefail
+
+# Create logs/data directories if they don't exist
 mkdir -p logs
 mkdir -p data
 
@@ -21,32 +23,56 @@ else
     exit 1
 fi
 
-# Define input and output
-INPUT_LIST="sokoban_core/levels/splits/train.txt"
-OUTPUT_DIR="data/generated_labels"
-mkdir -p $OUTPUT_DIR
+# Inputs/outputs
+LIST="${LIST:-sokoban_core/levels/splits/train.txt}"
+OUT_DIR="${OUT_DIR:-data/generated_labels}"
+OUTPUT_BASENAME="${OUTPUT_BASENAME:-labels_part}"
 
-# The output file for this shard
-OUTPUT_FILE="${OUTPUT_DIR}/labels_part_${SLURM_ARRAY_TASK_ID}.jsonl"
+# Sharding
+NUM_SHARDS="${NUM_SHARDS:-50}"
+SHARD_IDX="${SLURM_ARRAY_TASK_ID}"
+if [ "$SHARD_IDX" -ge "$NUM_SHARDS" ]; then
+    echo "ERROR: SHARD_IDX=${SHARD_IDX} is >= NUM_SHARDS=${NUM_SHARDS} (check --array size)"
+    exit 1
+fi
 
-# Number of parallel jobs (shards)
-# Must match the --array range size (0-49 = 50 jobs)
-NUM_SHARDS=50
+# Solver params
+HEURISTIC="${HEURISTIC:-hungarian}"
+USE_DL="${USE_DL:-1}"
+TIME_LIMIT="${TIME_LIMIT:-300}"
+NODE_LIMIT="${NODE_LIMIT:-3000000}"
+JOBS="${JOBS:-$SLURM_CPUS_PER_TASK}"
 
-echo "Starting task $SLURM_ARRAY_TASK_ID / $NUM_SHARDS"
+if [ ! -f "$LIST" ]; then
+    echo "Input list not found: $LIST"
+    exit 1
+fi
+
+mkdir -p "$OUT_DIR"
+OUTPUT_FILE="${OUT_DIR}/${OUTPUT_BASENAME}_${SHARD_IDX}.jsonl"
+
+echo "Starting task $SHARD_IDX / $NUM_SHARDS"
 echo "Running on node: $(hostname)"
 echo "Python: $(which python3)"
+echo "List: $LIST"
+echo "Out:  $OUTPUT_FILE"
 
-# Run the command
-python3 -m scripts.labels.generate_labels \
-    --list "$INPUT_LIST" \
-    --out "$OUTPUT_FILE" \
-    --h hungarian \
-    --use_dl \
-    --time_limit 300 \
-    --node_limit 3000000 \
-    --jobs $SLURM_CPUS_PER_TASK \
-    --shard_idx $SLURM_ARRAY_TASK_ID \
-    --num_shards $NUM_SHARDS
+CMD=(
+    python3 -m scripts.labels.generate_labels
+    --list "$LIST"
+    --out "$OUTPUT_FILE"
+    --h "$HEURISTIC"
+    --time_limit "$TIME_LIMIT"
+    --node_limit "$NODE_LIMIT"
+    --jobs "$JOBS"
+    --shard_idx "$SHARD_IDX"
+    --num_shards "$NUM_SHARDS"
+)
 
-echo "Task $SLURM_ARRAY_TASK_ID finished."
+if [ "$USE_DL" = "1" ]; then
+    CMD+=(--use_dl)
+fi
+
+"${CMD[@]}"
+
+echo "Task $SHARD_IDX finished."

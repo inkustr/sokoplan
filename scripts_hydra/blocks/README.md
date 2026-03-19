@@ -1,93 +1,127 @@
-# Pack-based blocks pipeline
+# Pack-based blocks pipeline (Hydra, parameterized)
 
-## Step 0
-Filter Packs
+Run all commands from the repository root.
+
+## 0) One-time setup
 
 ```bash
 source .venv/bin/activate
-python -m scripts.blocks.utils.filter_packs --config configs/data.yaml --pack_subdir packs --out_dir sokoban_core/levels/packs_filtered
 ```
 
-## Step 1 — Generate labels per pack
+For any `.sbatch` script, prefer passing paths/params via environment variables:
 
 ```bash
-sbatch scripts_hydra/blocks/run_generate_labels_packs_array.sbatch
+VAR1=value1 VAR2=value2 sbatch scripts_hydra/blocks/<script>.sbatch
 ```
 
-### 1.1 Filter packs by solved labels
-Keep only levels that were successfully solved.
+If you change shard count, keep `NUM_SHARDS` and SLURM array in sync:
+
+```bash
+NUM_SHARDS=80 sbatch --array=0-79 scripts_hydra/blocks/<script>.sbatch
+```
+
+## 1) Step 0: filter packs
+
+```bash
+python -m scripts.blocks.utils.filter_packs \
+  --config "$DATA_CONFIG" \
+  --pack_subdir "$PACK_SUBDIR" \
+  --out_dir "$PACKS_DIR"
+```
+
+## 2) Step 1: generate labels per pack
+
+```bash
+LABEL_SHARDS=50
+PACKS_DIR="$PACKS_DIR" OUT_DIR="$LABELS_DIR" NUM_SHARDS="$LABEL_SHARDS" \
+sbatch --array=0-$((LABEL_SHARDS - 1)) scripts_hydra/blocks/run_generate_labels_packs_array.sbatch
+```
+
+### 2.1 Keep only solved levels
+
 ```bash
 python -m scripts.blocks.utils.filter_solved_by_labels \
-    --packs_dir sokoban_core/levels/packs_filtered \
-    --labels_dir data/packs_labels_festival \
-    --out_dir sokoban_core/levels/packs_solved
+  --packs_dir "$PACKS_DIR" \
+  --labels_dir "$LABELS_DIR" \
+  --out_dir "$PACKS_SOLVED_DIR"
 ```
 
-### 1.2 Remap labels to new IDs
-Since filtering changed level indices, we must remap the `.jsonl` files to use the new `level_id`s from `packs_solved`.
+### 2.2 Remap labels to new level IDs
+
+Filtering changes `level_id`, so label files must be remapped to the new metadata.
+
 ```bash
 python -m scripts.labels.remap_labels_to_solved \
-    --meta_dir sokoban_core/levels/packs_solved/meta \
-    --labels_in data/packs_offpolicy_labels_festival \
-    --labels_out data/packs_offpolicy_labels_festival_solved
+  --meta_dir "$PACKS_SOLVED_DIR/meta" \
+  --labels_in "$OFFPOLICY_LABELS_IN" \
+  --labels_out "$OFFPOLICY_LABELS_SOLVED"
 ```
 
-## Step 2 — Train one small GNN per pack
-
-Submit:
+## 3) Step 2: train one GNN per pack
 
 ```bash
-sbatch scripts_hydra/blocks/run_train_packs_array.sbatch
+TRAIN_SHARDS=35
+LABELS_DIR="$LABELS_DIR" OUT_DIR="$MODELS_DIR" NUM_SHARDS="$TRAIN_SHARDS" \
+sbatch --array=0-$((TRAIN_SHARDS - 1)) scripts_hydra/blocks/run_train_packs_array.sbatch
 ```
 
-Outputs:
-- `artifacts/packs_models/<pack>_best.pt`
+Output files:
+- `"$MODELS_DIR/<pack>_best.pt"`
 
-## Step 3.1 — Split packs
+## 4) Step 3.1: split packs by self-eval
 
 1) Run self-eval:
 
 ```bash
-sbatch scripts_hydra/blocks/run_self_eval_packs_array.sbatch
+SELF_EVAL_SHARDS=50
+LABELS_DIR="$LABELS_DIR" MODELS_DIR="$MODELS_DIR" OUT_DIR="$SELF_EVAL_DIR" NUM_SHARDS="$SELF_EVAL_SHARDS" \
+sbatch --array=0-$((SELF_EVAL_SHARDS - 1)) scripts_hydra/blocks/run_self_eval_packs_array.sbatch
 ```
 
-2) Create new list files based on per-level MAE (using auto_gap for balanced splits):
+2) Create split lists by per-level MAE:
 
 ```bash
-source .venv/bin/activate
 python -m scripts.blocks.split.plan_splits \
-    --eval_dir results/packs_self_eval \
-    --out_lists_dir sokoban_core/levels/pack_blocks/lists \
-    --method auto_gap \
-    --auto_gap_balance_power 0.5 \
-    --min_hard_levels 50
+  --eval_dir "$SELF_EVAL_DIR" \
+  --out_lists_dir "$SPLIT_LISTS_DIR" \
+  --method auto_gap \
+  --auto_gap_balance_power 0.5 \
+  --min_hard_levels 50
 ```
 
-## Step 3.2 — Merge packs
+## 5) Step 3.2: merge packs
 
-1) Build candidate pairs locally:
+1) Build candidate pairs:
 
 ```bash
-source .venv/bin/activate
-python -m scripts.blocks.merge.build_merge_pairs --labels_dir data/packs_labels_festival --out results/merge_pairs.csv --k 75 --sample_records 2000
+python -m scripts.blocks.merge.build_merge_pairs \
+  --labels_dir "$LABELS_DIR" \
+  --out "$MERGE_PAIRS_CSV" \
+  --k 75 \
+  --sample_records 2000
 ```
 
 2) Run cross-eval:
 
 ```bash
-sbatch scripts_hydra/blocks/run_cross_eval_pairs_array.sbatch
+CROSS_SHARDS=50
+PAIRS="$MERGE_PAIRS_CSV" LABELS_DIR="$LABELS_DIR" MODELS_DIR="$MODELS_DIR" OUT_DIR="$CROSS_EVAL_DIR" NUM_SHARDS="$CROSS_SHARDS" \
+sbatch --array=0-$((CROSS_SHARDS - 1)) scripts_hydra/blocks/run_cross_eval_pairs_array.sbatch
 ```
 
-3) Merge shard CSVs into one, then plan merges:
+3) Merge shard CSVs and plan merges:
 
 ```bash
-cat results/cross_eval/cross_eval_shard_*.csv | awk 'NR==1 || $0 !~ /^model_pack,/' > results/cross_eval.csv
+cat "$CROSS_EVAL_DIR"/cross_eval_shard_*.csv | awk 'NR==1 || $0 !~ /^model_pack,/' > "$CROSS_EVAL_CSV"
+
 python -m scripts.blocks.merge.plan_merges \
-  --cross_eval results/cross_eval.csv \
-  --self_eval_dir results/packs_self_eval \
-  --ratio_quantile 0.10 --offset 2.0 --max_degree 4 \
-  --packs_lists_dir sokoban_core/levels/packs_filtered/lists \
-  --out_lists_dir sokoban_core/levels/pack_groups/lists
+  --cross_eval "$CROSS_EVAL_CSV" \
+  --self_eval_dir "$SELF_EVAL_DIR" \
+  --ratio_quantile 0.10 \
+  --offset 2.0 \
+  --max_degree 4 \
+  --packs_lists_dir "$PACKS_DIR/lists" \
+  --out_lists_dir "$MERGED_LISTS_DIR"
 ```
 
 

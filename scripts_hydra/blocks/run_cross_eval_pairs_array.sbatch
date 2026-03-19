@@ -17,17 +17,22 @@
 
 set -euo pipefail
 mkdir -p logs
-mkdir -p results/cross_eval
 
-source .venv/bin/activate
+if [ -f ".venv/bin/activate" ]; then
+  source .venv/bin/activate
+else
+  echo ".venv not found in project root"
+  exit 1
+fi
 
 PAIRS="${PAIRS:-results/merge_pairs.csv}"
-LABELS_DIR="${LABELS_DIR:-data/group_labels_festival}"
+LABELS_DIR="${LABELS_DIR:-data/packs_labels_festival}"
 MODELS_DIR="${MODELS_DIR:-artifacts/packs_models}"
 OUT_DIR="${OUT_DIR:-results/cross_eval}"
 NUM_SHARDS="${NUM_SHARDS:-50}"
 SHARD_IDX="${SLURM_ARRAY_TASK_ID}"
 LIMIT_RECORDS="${LIMIT_RECORDS:-7000}"
+mkdir -p "$OUT_DIR"
 
 out="${OUT_DIR}/cross_eval_shard_${SHARD_IDX}.csv"
 

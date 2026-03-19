@@ -33,7 +33,7 @@ else
   exit 1
 fi
 
-LABELS_DIR="${LABELS_DIR:-data/group_labels_festival}"
+LABELS_DIR="${LABELS_DIR:-data/packs_labels_festival}"
 OUT_DIR="${OUT_DIR:-artifacts/packs_models}"
 NUM_SHARDS="${NUM_SHARDS:-35}"
 SHARD_IDX="${SLURM_ARRAY_TASK_ID}"
