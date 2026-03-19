@@ -449,6 +449,6 @@
   "levels_with_labels": 442,
   "levels_written": 442,
   "pack": "0624_suitcase_01",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0624_suitcase_01.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0624_suitcase_01.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0624_suitcase_01.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0624_suitcase_01.txt"
 }

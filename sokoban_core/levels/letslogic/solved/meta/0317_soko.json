@@ -266,6 +266,6 @@
   "levels_with_labels": 259,
   "levels_written": 259,
   "pack": "0317_soko",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0317_soko.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0317_soko.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0317_soko.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0317_soko.txt"
 }

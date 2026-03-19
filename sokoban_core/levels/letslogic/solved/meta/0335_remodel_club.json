@@ -78,6 +78,6 @@
   "levels_with_labels": 71,
   "levels_written": 71,
   "pack": "0335_remodel_club",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0335_remodel_club.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0335_remodel_club.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0335_remodel_club.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0335_remodel_club.txt"
 }

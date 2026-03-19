@@ -66,6 +66,6 @@
   "levels_with_labels": 59,
   "levels_written": 59,
   "pack": "0872_kolibri",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0872_kolibri.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0872_kolibri.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0872_kolibri.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0872_kolibri.txt"
 }

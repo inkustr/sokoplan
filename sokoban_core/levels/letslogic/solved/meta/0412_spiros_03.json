@@ -206,6 +206,6 @@
   "levels_with_labels": 199,
   "levels_written": 199,
   "pack": "0412_spiros_03",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0412_spiros_03.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0412_spiros_03.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0412_spiros_03.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0412_spiros_03.txt"
 }

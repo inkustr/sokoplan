@@ -62,6 +62,6 @@
   "levels_with_labels": 55,
   "levels_written": 55,
   "pack": "0211_revenge_14",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0211_revenge_14.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0211_revenge_14.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0211_revenge_14.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0211_revenge_14.txt"
 }

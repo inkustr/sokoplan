@@ -56,6 +56,6 @@
   "levels_with_labels": 49,
   "levels_written": 49,
   "pack": "0448_sokoman_3",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0448_sokoman_3.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0448_sokoman_3.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0448_sokoman_3.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0448_sokoman_3.txt"
 }

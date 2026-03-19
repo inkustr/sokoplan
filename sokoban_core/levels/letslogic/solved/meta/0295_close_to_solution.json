@@ -38,6 +38,6 @@
   "levels_with_labels": 31,
   "levels_written": 31,
   "pack": "0295_close_to_solution",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0295_close_to_solution.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0295_close_to_solution.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0295_close_to_solution.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0295_close_to_solution.txt"
 }

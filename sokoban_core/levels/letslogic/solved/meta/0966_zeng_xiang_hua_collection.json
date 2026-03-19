@@ -508,6 +508,6 @@
   "levels_with_labels": 501,
   "levels_written": 501,
   "pack": "0966_zeng_xiang_hua_collection",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0966_zeng_xiang_hua_collection.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0966_zeng_xiang_hua_collection.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0966_zeng_xiang_hua_collection.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0966_zeng_xiang_hua_collection.txt"
 }

@@ -67,6 +67,6 @@
   "levels_with_labels": 60,
   "levels_written": 60,
   "pack": "0860_bruna_maria",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0860_bruna_maria.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0860_bruna_maria.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0860_bruna_maria.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0860_bruna_maria.txt"
 }

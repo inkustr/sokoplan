@@ -22,6 +22,6 @@
   "levels_with_labels": 15,
   "levels_written": 15,
   "pack": "0846_mariposa",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0846_mariposa.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0846_mariposa.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0846_mariposa.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0846_mariposa.txt"
 }

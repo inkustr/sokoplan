@@ -253,6 +253,6 @@
   "levels_with_labels": 246,
   "levels_written": 246,
   "pack": "0562_alberto_multipack",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0562_alberto_multipack.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0562_alberto_multipack.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0562_alberto_multipack.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0562_alberto_multipack.txt"
 }

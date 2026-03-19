@@ -64,6 +64,6 @@
   "levels_with_labels": 57,
   "levels_written": 57,
   "pack": "0938_abht_04",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0938_abht_04.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0938_abht_04.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0938_abht_04.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0938_abht_04.txt"
 }

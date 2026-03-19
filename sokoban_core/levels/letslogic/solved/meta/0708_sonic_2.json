@@ -50,6 +50,6 @@
   "levels_with_labels": 43,
   "levels_written": 43,
   "pack": "0708_sonic_2",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0708_sonic_2.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0708_sonic_2.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0708_sonic_2.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0708_sonic_2.txt"
 }

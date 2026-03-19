@@ -45,6 +45,6 @@
   "levels_with_labels": 38,
   "levels_written": 38,
   "pack": "0298_hail_and_solve",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0298_hail_and_solve.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0298_hail_and_solve.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0298_hail_and_solve.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0298_hail_and_solve.txt"
 }

@@ -73,6 +73,6 @@
   "levels_with_labels": 66,
   "levels_written": 66,
   "pack": "0454_drina",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0454_drina.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0454_drina.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0454_drina.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0454_drina.txt"
 }

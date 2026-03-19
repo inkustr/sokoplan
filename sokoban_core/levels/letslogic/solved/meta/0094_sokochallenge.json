@@ -32,6 +32,6 @@
   "levels_with_labels": 25,
   "levels_written": 25,
   "pack": "0094_sokochallenge",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0094_sokochallenge.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0094_sokochallenge.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0094_sokochallenge.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0094_sokochallenge.txt"
 }

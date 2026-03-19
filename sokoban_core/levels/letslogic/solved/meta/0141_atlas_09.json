@@ -86,6 +86,6 @@
   "levels_with_labels": 79,
   "levels_written": 79,
   "pack": "0141_atlas_09",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0141_atlas_09.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0141_atlas_09.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0141_atlas_09.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0141_atlas_09.txt"
 }

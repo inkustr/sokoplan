@@ -58,6 +58,6 @@
   "levels_with_labels": 51,
   "levels_written": 51,
   "pack": "0978_jupe_collection_06",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0978_jupe_collection_06.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0978_jupe_collection_06.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0978_jupe_collection_06.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0978_jupe_collection_06.txt"
 }

@@ -43,6 +43,6 @@
   "levels_with_labels": 36,
   "levels_written": 36,
   "pack": "0290_4_55_am",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0290_4_55_am.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0290_4_55_am.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0290_4_55_am.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0290_4_55_am.txt"
 }

@@ -23,6 +23,6 @@
   "levels_with_labels": 16,
   "levels_written": 16,
   "pack": "0964_25_etudes_romantiques_oubliees",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0964_25_etudes_romantiques_oubliees.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0964_25_etudes_romantiques_oubliees.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0964_25_etudes_romantiques_oubliees.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0964_25_etudes_romantiques_oubliees.txt"
 }

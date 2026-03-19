@@ -68,6 +68,6 @@
   "levels_with_labels": 61,
   "levels_written": 61,
   "pack": "0062_dimitri_yorick",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0062_dimitri_yorick.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0062_dimitri_yorick.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0062_dimitri_yorick.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0062_dimitri_yorick.txt"
 }

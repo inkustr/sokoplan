@@ -1809,6 +1809,6 @@
   "levels_with_labels": 1802,
   "levels_written": 1802,
   "pack": "0204_svens_collection",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0204_svens_collection.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0204_svens_collection.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0204_svens_collection.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0204_svens_collection.txt"
 }

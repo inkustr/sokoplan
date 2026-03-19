@@ -30,6 +30,6 @@
   "levels_with_labels": 23,
   "levels_written": 23,
   "pack": "1021_sokoext",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/1021_sokoext.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/1021_sokoext.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/1021_sokoext.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/1021_sokoext.txt"
 }

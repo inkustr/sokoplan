@@ -27,6 +27,6 @@
   "levels_with_labels": 20,
   "levels_written": 20,
   "pack": "0084_scoria_03",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0084_scoria_03.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0084_scoria_03.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0084_scoria_03.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0084_scoria_03.txt"
 }

@@ -43,6 +43,6 @@
   "levels_with_labels": 36,
   "levels_written": 36,
   "pack": "0221_chuchubi_13",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0221_chuchubi_13.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0221_chuchubi_13.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0221_chuchubi_13.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0221_chuchubi_13.txt"
 }

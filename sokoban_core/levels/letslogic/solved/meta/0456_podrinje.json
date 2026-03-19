@@ -56,6 +56,6 @@
   "levels_with_labels": 49,
   "levels_written": 49,
   "pack": "0456_podrinje",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0456_podrinje.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0456_podrinje.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0456_podrinje.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0456_podrinje.txt"
 }

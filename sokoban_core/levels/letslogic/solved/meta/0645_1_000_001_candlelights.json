@@ -79,6 +79,6 @@
   "levels_with_labels": 72,
   "levels_written": 72,
   "pack": "0645_1_000_001_candlelights",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0645_1_000_001_candlelights.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0645_1_000_001_candlelights.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0645_1_000_001_candlelights.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0645_1_000_001_candlelights.txt"
 }

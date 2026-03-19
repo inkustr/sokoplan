@@ -43,6 +43,6 @@
   "levels_with_labels": 36,
   "levels_written": 36,
   "pack": "0088_small_chessboards",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0088_small_chessboards.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0088_small_chessboards.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0088_small_chessboards.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0088_small_chessboards.txt"
 }

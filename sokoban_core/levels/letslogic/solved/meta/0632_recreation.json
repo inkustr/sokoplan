@@ -775,6 +775,6 @@
   "levels_with_labels": 768,
   "levels_written": 768,
   "pack": "0632_recreation",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0632_recreation.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0632_recreation.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0632_recreation.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0632_recreation.txt"
 }

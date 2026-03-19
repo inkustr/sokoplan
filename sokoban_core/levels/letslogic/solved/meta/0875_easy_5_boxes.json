@@ -57,6 +57,6 @@
   "levels_with_labels": 50,
   "levels_written": 50,
   "pack": "0875_easy_5_boxes",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0875_easy_5_boxes.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0875_easy_5_boxes.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0875_easy_5_boxes.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0875_easy_5_boxes.txt"
 }

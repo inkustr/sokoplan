@@ -35,6 +35,6 @@
   "levels_with_labels": 28,
   "levels_written": 28,
   "pack": "0402_payback_06",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0402_payback_06.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0402_payback_06.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0402_payback_06.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0402_payback_06.txt"
 }

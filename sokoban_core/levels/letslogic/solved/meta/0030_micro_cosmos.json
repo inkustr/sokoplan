@@ -47,6 +47,6 @@
   "levels_with_labels": 40,
   "levels_written": 40,
   "pack": "0030_micro_cosmos",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0030_micro_cosmos.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0030_micro_cosmos.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0030_micro_cosmos.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0030_micro_cosmos.txt"
 }

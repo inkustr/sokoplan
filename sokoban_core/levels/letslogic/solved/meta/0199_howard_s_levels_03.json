@@ -47,6 +47,6 @@
   "levels_with_labels": 40,
   "levels_written": 40,
   "pack": "0199_howard_s_levels_03",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0199_howard_s_levels_03.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0199_howard_s_levels_03.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0199_howard_s_levels_03.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0199_howard_s_levels_03.txt"
 }

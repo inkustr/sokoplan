@@ -358,6 +358,6 @@
   "levels_with_labels": 351,
   "levels_written": 351,
   "pack": "0578_warehouse",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0578_warehouse.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0578_warehouse.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0578_warehouse.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0578_warehouse.txt"
 }

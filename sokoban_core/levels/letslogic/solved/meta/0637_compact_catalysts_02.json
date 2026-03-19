@@ -212,6 +212,6 @@
   "levels_with_labels": 205,
   "levels_written": 205,
   "pack": "0637_compact_catalysts_02",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0637_compact_catalysts_02.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0637_compact_catalysts_02.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0637_compact_catalysts_02.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0637_compact_catalysts_02.txt"
 }

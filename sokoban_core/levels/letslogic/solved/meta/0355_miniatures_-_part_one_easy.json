@@ -66,6 +66,6 @@
   "levels_with_labels": 59,
   "levels_written": 59,
   "pack": "0355_miniatures_-_part_one_easy",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0355_miniatures_-_part_one_easy.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0355_miniatures_-_part_one_easy.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0355_miniatures_-_part_one_easy.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0355_miniatures_-_part_one_easy.txt"
 }

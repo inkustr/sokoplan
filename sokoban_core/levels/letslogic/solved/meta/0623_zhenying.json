@@ -48,6 +48,6 @@
   "levels_with_labels": 41,
   "levels_written": 41,
   "pack": "0623_zhenying",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0623_zhenying.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0623_zhenying.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0623_zhenying.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0623_zhenying.txt"
 }

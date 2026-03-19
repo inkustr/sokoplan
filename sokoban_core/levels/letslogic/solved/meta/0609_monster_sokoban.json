@@ -63,6 +63,6 @@
   "levels_with_labels": 56,
   "levels_written": 56,
   "pack": "0609_monster_sokoban",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0609_monster_sokoban.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0609_monster_sokoban.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0609_monster_sokoban.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0609_monster_sokoban.txt"
 }

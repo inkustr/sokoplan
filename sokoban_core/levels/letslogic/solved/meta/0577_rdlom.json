@@ -173,6 +173,6 @@
   "levels_with_labels": 166,
   "levels_written": 166,
   "pack": "0577_rdlom",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0577_rdlom.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0577_rdlom.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0577_rdlom.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0577_rdlom.txt"
 }

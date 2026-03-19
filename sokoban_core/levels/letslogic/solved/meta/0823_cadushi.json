@@ -52,6 +52,6 @@
   "levels_with_labels": 45,
   "levels_written": 45,
   "pack": "0823_cadushi",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0823_cadushi.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0823_cadushi.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0823_cadushi.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0823_cadushi.txt"
 }

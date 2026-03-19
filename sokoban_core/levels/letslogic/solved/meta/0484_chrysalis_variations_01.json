@@ -75,6 +75,6 @@
   "levels_with_labels": 68,
   "levels_written": 68,
   "pack": "0484_chrysalis_variations_01",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0484_chrysalis_variations_01.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0484_chrysalis_variations_01.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0484_chrysalis_variations_01.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0484_chrysalis_variations_01.txt"
 }

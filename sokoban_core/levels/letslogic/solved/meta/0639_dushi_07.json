@@ -47,6 +47,6 @@
   "levels_with_labels": 40,
   "levels_written": 40,
   "pack": "0639_dushi_07",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0639_dushi_07.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0639_dushi_07.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0639_dushi_07.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0639_dushi_07.txt"
 }

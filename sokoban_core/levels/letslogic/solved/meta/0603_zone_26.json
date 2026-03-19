@@ -124,6 +124,6 @@
   "levels_with_labels": 117,
   "levels_written": 117,
   "pack": "0603_zone_26",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0603_zone_26.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0603_zone_26.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0603_zone_26.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0603_zone_26.txt"
 }

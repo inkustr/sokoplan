@@ -72,6 +72,6 @@
   "levels_with_labels": 65,
   "levels_written": 65,
   "pack": "0103_jean-pierre_kent",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0103_jean-pierre_kent.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0103_jean-pierre_kent.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0103_jean-pierre_kent.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0103_jean-pierre_kent.txt"
 }

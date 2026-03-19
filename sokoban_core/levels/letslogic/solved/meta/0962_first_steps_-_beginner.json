@@ -107,6 +107,6 @@
   "levels_with_labels": 100,
   "levels_written": 100,
   "pack": "0962_first_steps_-_beginner",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0962_first_steps_-_beginner.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0962_first_steps_-_beginner.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0962_first_steps_-_beginner.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0962_first_steps_-_beginner.txt"
 }

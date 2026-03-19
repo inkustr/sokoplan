@@ -32,6 +32,6 @@
   "levels_with_labels": 25,
   "levels_written": 25,
   "pack": "0961_farm_collection",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0961_farm_collection.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0961_farm_collection.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0961_farm_collection.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0961_farm_collection.txt"
 }

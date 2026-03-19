@@ -28,6 +28,6 @@
   "levels_with_labels": 21,
   "levels_written": 21,
   "pack": "0662_lines_of_wisdom_and_agony",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0662_lines_of_wisdom_and_agony.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0662_lines_of_wisdom_and_agony.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0662_lines_of_wisdom_and_agony.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0662_lines_of_wisdom_and_agony.txt"
 }

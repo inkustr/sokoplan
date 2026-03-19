@@ -80,6 +80,6 @@
   "levels_with_labels": 73,
   "levels_written": 73,
   "pack": "0189_mulholland_2",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0189_mulholland_2.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0189_mulholland_2.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0189_mulholland_2.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0189_mulholland_2.txt"
 }

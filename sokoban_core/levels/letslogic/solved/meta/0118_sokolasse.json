@@ -37,6 +37,6 @@
   "levels_with_labels": 30,
   "levels_written": 30,
   "pack": "0118_sokolasse",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0118_sokolasse.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0118_sokolasse.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0118_sokolasse.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0118_sokolasse.txt"
 }

@@ -109,6 +109,6 @@
   "levels_with_labels": 102,
   "levels_written": 102,
   "pack": "0486_magic_sokoban_5",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0486_magic_sokoban_5.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0486_magic_sokoban_5.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0486_magic_sokoban_5.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0486_magic_sokoban_5.txt"
 }

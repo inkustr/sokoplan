@@ -123,6 +123,6 @@
   "levels_with_labels": 116,
   "levels_written": 116,
   "pack": "0473_sokomania",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0473_sokomania.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0473_sokomania.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0473_sokomania.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0473_sokomania.txt"
 }

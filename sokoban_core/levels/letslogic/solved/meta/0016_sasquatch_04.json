@@ -46,6 +46,6 @@
   "levels_with_labels": 39,
   "levels_written": 39,
   "pack": "0016_sasquatch_04",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0016_sasquatch_04.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0016_sasquatch_04.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0016_sasquatch_04.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0016_sasquatch_04.txt"
 }

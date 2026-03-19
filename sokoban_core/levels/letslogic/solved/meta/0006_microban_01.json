@@ -162,6 +162,6 @@
   "levels_with_labels": 155,
   "levels_written": 155,
   "pack": "0006_microban_01",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0006_microban_01.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0006_microban_01.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0006_microban_01.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0006_microban_01.txt"
 }

@@ -67,6 +67,6 @@
   "levels_with_labels": 60,
   "levels_written": 60,
   "pack": "0444_sokoban_junior_1",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0444_sokoban_junior_1.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0444_sokoban_junior_1.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0444_sokoban_junior_1.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0444_sokoban_junior_1.txt"
 }

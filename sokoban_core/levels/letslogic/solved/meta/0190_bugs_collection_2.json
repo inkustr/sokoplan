@@ -105,6 +105,6 @@
   "levels_with_labels": 98,
   "levels_written": 98,
   "pack": "0190_bugs_collection_2",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0190_bugs_collection_2.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0190_bugs_collection_2.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0190_bugs_collection_2.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0190_bugs_collection_2.txt"
 }

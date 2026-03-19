@@ -480,6 +480,6 @@
   "levels_with_labels": 473,
   "levels_written": 473,
   "pack": "0197_bugs_550_collection",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0197_bugs_550_collection.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0197_bugs_550_collection.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0197_bugs_550_collection.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0197_bugs_550_collection.txt"
 }

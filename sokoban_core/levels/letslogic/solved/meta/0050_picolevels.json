@@ -52,6 +52,6 @@
   "levels_with_labels": 45,
   "levels_written": 45,
   "pack": "0050_picolevels",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0050_picolevels.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0050_picolevels.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0050_picolevels.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0050_picolevels.txt"
 }

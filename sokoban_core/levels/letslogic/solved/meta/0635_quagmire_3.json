@@ -106,6 +106,6 @@
   "levels_with_labels": 99,
   "levels_written": 99,
   "pack": "0635_quagmire_3",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0635_quagmire_3.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0635_quagmire_3.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0635_quagmire_3.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0635_quagmire_3.txt"
 }

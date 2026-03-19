@@ -319,6 +319,6 @@
   "levels_with_labels": 312,
   "levels_written": 312,
   "pack": "0559_monry_collection",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0559_monry_collection.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0559_monry_collection.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0559_monry_collection.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0559_monry_collection.txt"
 }

@@ -107,6 +107,6 @@
   "levels_with_labels": 100,
   "levels_written": 100,
   "pack": "0102_serg_belyaev_01",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0102_serg_belyaev_01.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0102_serg_belyaev_01.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0102_serg_belyaev_01.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0102_serg_belyaev_01.txt"
 }

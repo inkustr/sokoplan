@@ -79,6 +79,6 @@
   "levels_with_labels": 72,
   "levels_written": 72,
   "pack": "0604_v2014",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0604_v2014.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0604_v2014.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0604_v2014.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0604_v2014.txt"
 }

@@ -46,6 +46,6 @@
   "levels_with_labels": 39,
   "levels_written": 39,
   "pack": "0944_small_levels",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0944_small_levels.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0944_small_levels.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0944_small_levels.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0944_small_levels.txt"
 }

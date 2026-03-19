@@ -36,6 +36,6 @@
   "levels_with_labels": 29,
   "levels_written": 29,
   "pack": "0334_comet",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0334_comet.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0334_comet.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0334_comet.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0334_comet.txt"
 }

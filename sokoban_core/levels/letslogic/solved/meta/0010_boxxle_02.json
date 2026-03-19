@@ -126,6 +126,6 @@
   "levels_with_labels": 119,
   "levels_written": 119,
   "pack": "0010_boxxle_02",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0010_boxxle_02.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0010_boxxle_02.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0010_boxxle_02.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0010_boxxle_02.txt"
 }

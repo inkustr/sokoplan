@@ -90,6 +90,6 @@
   "levels_with_labels": 83,
   "levels_written": 83,
   "pack": "0155_cosmac_02",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0155_cosmac_02.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0155_cosmac_02.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0155_cosmac_02.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0155_cosmac_02.txt"
 }

@@ -24,6 +24,6 @@
   "levels_with_labels": 17,
   "levels_written": 17,
   "pack": "0282_marcus_palstra",
-  "source_list": "sokoban_core/levels/letslogic_filtered/lists/0282_marcus_palstra.list",
-  "source_pack_txt": "sokoban_core/levels/letslogic_filtered/0282_marcus_palstra.txt"
+  "source_list": "sokoban_core/levels/letslogic/filtered/lists/0282_marcus_palstra.list",
+  "source_pack_txt": "sokoban_core/levels/letslogic/filtered/0282_marcus_palstra.txt"
 }
