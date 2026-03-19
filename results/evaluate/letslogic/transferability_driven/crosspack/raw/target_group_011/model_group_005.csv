@@ -1,0 +1,17 @@
+level_id,heuristic,success,nodes,runtime,solution_len
+sokoban_core/levels/letslogic/solved/0132_aruba_06.txt#26,gnn[speed+dl],True,113968,197.919827473966,32
+sokoban_core/levels/letslogic/solved/0009_boxxle_01.txt#67,gnn[speed+dl],False,308570,300.018784323966,-1
+sokoban_core/levels/letslogic/solved/0460_all_remodels.txt#35,gnn[speed+dl],False,204096,300.072320209145,-1
+sokoban_core/levels/letslogic/solved/0132_aruba_06.txt#16,gnn[speed+dl],False,38462,300.066674422438,-1
+sokoban_core/levels/letslogic/solved/0009_boxxle_01.txt#82,gnn[speed+dl],False,133913,300.051857794803,-1
+sokoban_core/levels/letslogic/solved/0009_boxxle_01.txt#49,gnn[speed+dl],False,418124,300.031799622181,-1
+sokoban_core/levels/letslogic/solved/0132_aruba_06.txt#31,gnn[speed+dl],False,14594,300.000288188589,-1
+sokoban_core/levels/letslogic/solved/0132_aruba_06.txt#6,gnn[speed+dl],False,277040,300.042769760773,-1
+sokoban_core/levels/letslogic/solved/0460_all_remodels.txt#93,gnn[speed+dl],False,95259,300.009801449207,-1
+sokoban_core/levels/letslogic/solved/0137_atlas_05.txt#58,gnn[speed+dl],False,42577,300.024417386166,-1
+sokoban_core/levels/letslogic/solved/0460_all_remodels.txt#43,gnn[speed+dl],False,439929,300.045805523305,-1
+sokoban_core/levels/letslogic/solved/0460_all_remodels.txt#81,gnn[speed+dl],False,194031,300.038537617796,-1
+sokoban_core/levels/letslogic/solved/0132_aruba_06.txt#21,gnn[speed+dl],False,98213,300.069413263138,-1
+sokoban_core/levels/letslogic/solved/0132_aruba_06.txt#8,gnn[speed+dl],False,169711,300.066652711373,-1
+sokoban_core/levels/letslogic/solved/0137_atlas_05.txt#76,gnn[speed+dl],False,233928,300.013681829183,-1
+sokoban_core/levels/letslogic/solved/0460_all_remodels.txt#76,gnn[speed+dl],False,103582,300.003983960466,-1

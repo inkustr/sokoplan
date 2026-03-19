@@ -1,0 +1,17 @@
+level_id,heuristic,success,nodes,runtime,solution_len
+sokoban_core/levels/letslogic/solved/0132_aruba_06.txt#31,hungarian+dl,False,44039,300.067785386232,-1
+sokoban_core/levels/letslogic/solved/0460_all_remodels.txt#35,hungarian+dl,False,407965,300.057420021885,-1
+sokoban_core/levels/letslogic/solved/0009_boxxle_01.txt#82,hungarian+dl,False,142660,300.046141737161,-1
+sokoban_core/levels/letslogic/solved/0137_atlas_05.txt#58,hungarian+dl,False,69558,300.049673404586,-1
+sokoban_core/levels/letslogic/solved/0460_all_remodels.txt#43,hungarian+dl,False,900483,300.035128395509,-1
+sokoban_core/levels/letslogic/solved/0460_all_remodels.txt#81,hungarian+dl,False,450510,300.046990261228,-1
+sokoban_core/levels/letslogic/solved/0132_aruba_06.txt#16,hungarian+dl,False,101882,300.065917090555,-1
+sokoban_core/levels/letslogic/solved/0132_aruba_06.txt#8,hungarian+dl,False,277150,300.008734874667,-1
+sokoban_core/levels/letslogic/solved/0009_boxxle_01.txt#49,hungarian+dl,False,306816,300.055814432322,-1
+sokoban_core/levels/letslogic/solved/0009_boxxle_01.txt#67,hungarian+dl,False,616664,300.050658895497,-1
+sokoban_core/levels/letslogic/solved/0460_all_remodels.txt#76,hungarian+dl,False,473552,300.017176509194,-1
+sokoban_core/levels/letslogic/solved/0137_atlas_05.txt#76,hungarian+dl,False,580436,300.033268994073,-1
+sokoban_core/levels/letslogic/solved/0460_all_remodels.txt#93,hungarian+dl,False,388197,300.03127397647,-1
+sokoban_core/levels/letslogic/solved/0132_aruba_06.txt#6,hungarian+dl,False,279212,300.034888419041,-1
+sokoban_core/levels/letslogic/solved/0132_aruba_06.txt#26,hungarian+dl,False,1199107,300.075696481111,-1
+sokoban_core/levels/letslogic/solved/0132_aruba_06.txt#21,hungarian+dl,False,1141537,300.059924879169,-1

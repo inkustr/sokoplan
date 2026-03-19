@@ -1,0 +1,9 @@
+level_id,heuristic,success,nodes,runtime,solution_len
+sokoban_core/levels/letslogic/solved/0710_sbmendonca_modifications.txt#10,gnn[speed+dl],False,166731,300.044817744276,-1
+sokoban_core/levels/letslogic/solved/0872_kolibri.txt#21,gnn[speed+dl],False,14744,300.049748588508,-1
+sokoban_core/levels/letslogic/solved/0732_passion_fruit.txt#19,gnn[speed+dl],False,129250,300.044502572826,-1
+sokoban_core/levels/letslogic/solved/0872_kolibri.txt#20,gnn[speed+dl],False,35660,300.007725063159,-1
+sokoban_core/levels/letslogic/solved/0872_kolibri.txt#42,gnn[speed+dl],False,208693,300.011761689705,-1
+sokoban_core/levels/letslogic/solved/0285_dd-1.txt#23,gnn[speed+dl],False,161521,300.027555713882,-1
+sokoban_core/levels/letslogic/solved/0732_passion_fruit.txt#1,gnn[speed+dl],False,6982,300.032664692807,-1
+sokoban_core/levels/letslogic/solved/0285_dd-1.txt#8,gnn[speed+dl],False,800637,300.064867928074,-1

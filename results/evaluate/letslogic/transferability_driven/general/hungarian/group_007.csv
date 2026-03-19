@@ -1,0 +1,9 @@
+level_id,heuristic,success,nodes,runtime,solution_len
+sokoban_core/levels/letslogic/solved/0285_dd-1.txt#8,hungarian+dl,True,1591905,254.44036472942,101
+sokoban_core/levels/letslogic/solved/0732_passion_fruit.txt#19,hungarian+dl,False,216471,300.026675901437,-1
+sokoban_core/levels/letslogic/solved/0732_passion_fruit.txt#1,hungarian+dl,False,20125,300.054115114522,-1
+sokoban_core/levels/letslogic/solved/0872_kolibri.txt#20,hungarian+dl,False,33734,300.028579768957,-1
+sokoban_core/levels/letslogic/solved/0872_kolibri.txt#21,hungarian+dl,False,76354,300.047119532475,-1
+sokoban_core/levels/letslogic/solved/0710_sbmendonca_modifications.txt#10,hungarian+dl,False,297003,300.056266598515,-1
+sokoban_core/levels/letslogic/solved/0285_dd-1.txt#23,hungarian+dl,False,233894,300.029046576944,-1
+sokoban_core/levels/letslogic/solved/0872_kolibri.txt#42,hungarian+dl,False,435395,300.039236319196,-1

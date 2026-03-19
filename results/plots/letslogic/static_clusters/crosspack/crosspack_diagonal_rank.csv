@@ -1,0 +1,13 @@
+target_group,n_levels,diagonal_rank,best_minus_diagonal_solved_rate
+group_000,683,1,0.000000
+group_001,525,4,0.003810
+group_002,510,5,0.007843
+group_003,425,9,0.037647
+group_004,401,1,0.000000
+group_005,388,5,0.020619
+group_006,339,3,0.032448
+group_007,271,3,0.029520
+group_008,240,1,0.000000
+group_009,155,10,0.051613
+group_010,146,6,0.027397
+group_011,31,3,0.032258
