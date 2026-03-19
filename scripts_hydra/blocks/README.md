@@ -84,10 +84,13 @@ sbatch --array=0-$((SELF_EVAL_SHARDS - 1)) scripts_hydra/blocks/run_self_eval_pa
 python -m scripts.blocks.split.plan_splits \
   --eval_dir "$SELF_EVAL_DIR" \
   --out_lists_dir "$SPLIT_LISTS_DIR" \
-  --method auto_gap \
-  --auto_gap_balance_power 0.5 \
-  --min_hard_levels 50
+  --gap_balance_power 0.5 \
+  --min_levels_to_split 80
 ```
+
+Parameter notes:
+- `--gap_balance_power 0.5` - split score uses `gap * balance^power`; lower values allow more imbalanced cuts.
+- `--min_levels_to_split 80` - packs smaller than this are kept as one list (no split).
 
 ## 5) Step 3.2: merge packs
 
@@ -100,6 +103,10 @@ python -m scripts.blocks.merge.build_merge_pairs \
   --k 75 \
   --sample_records 2000
 ```
+
+Parameter notes:
+- `--k 75` - if needed, for each pack, evaluate nearest `k` other packs as merge candidates.
+- `--sample_records 2000` - approximate each pack using at most this many label rows for faster neighbor search.
 
 2) Run cross-eval:
 
@@ -117,11 +124,7 @@ cat "$CROSS_EVAL_DIR"/cross_eval_shard_*.csv | awk 'NR==1 || $0 !~ /^model_pack,
 python -m scripts.blocks.merge.plan_merges \
   --cross_eval "$CROSS_EVAL_CSV" \
   --self_eval_dir "$SELF_EVAL_DIR" \
-  --ratio_quantile 0.10 \
-  --offset 2.0 \
-  --max_degree 4 \
   --packs_lists_dir "$PACKS_DIR/lists" \
   --out_lists_dir "$MERGED_LISTS_DIR"
 ```
-
 
