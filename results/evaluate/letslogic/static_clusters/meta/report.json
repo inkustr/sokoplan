@@ -1,6 +1,6 @@
 {
   "input": {
-    "in_lists_dir": "sokoban_core/levels/letslogic_solved/lists",
+    "in_lists_dir": "sokoban_core/levels/letslogic/solved/lists",
     "n_list_files": 467,
     "n_unique_levels": 41140
   },
