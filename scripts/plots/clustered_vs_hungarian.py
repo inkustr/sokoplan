@@ -182,9 +182,6 @@ def plot_runtime_nodes_all3(groups: List[GroupMetrics], out_path: Path) -> None:
     ax2.set_xticks(x, labels, rotation=45, ha="right")
     ax2.grid(axis="y", alpha=0.25)
 
-    for i, g in enumerate(groups):
-        ax2.text(i, 0.0, f"n={g.n_all3_solved}", fontsize=8, ha="center", va="bottom", rotation=90)
-
     save_plot(fig, out_path)
 
 

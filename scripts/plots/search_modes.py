@@ -16,7 +16,14 @@ import numpy as np
 def _domain_label(name: str) -> str:
     if "boxoban" in name.lower():
         return "Boxoban"
-    if "cluster" in name.lower() or "group001" in name.lower() or "group_001" in name.lower() or "static_group001" in name.lower():
+    lname = name.lower()
+    if (
+        "cluster" in lname
+        or "group001" in lname
+        or "group_001" in lname
+        or "static_group001" in lname
+        or "letslogic" in lname
+    ):
         return "Cluster"
     return name
 
@@ -41,53 +48,52 @@ def _extract_cost_rows(summary: Dict[str, object]) -> List[Tuple[str, str, Dict[
         modes = dobj.get("modes", {})
         if not isinstance(modes, dict):
             continue
-        for mode in ("speed", "optimal_mix"):
+        seen_modes = set()
+        mode_aliases = {
+            "speed": "speed",
+            "mixed": "mixed",
+            "optimal_mix": "mixed",
+        }
+        for mode in ("speed", "mixed", "optimal_mix"):
             m = modes.get(mode)
             if not isinstance(m, dict):
                 continue
-            rows.append((_domain_label(str(dname)), mode, m))
+            mapped_mode = mode_aliases[mode]
+            key = (_domain_label(str(dname)), mapped_mode)
+            if key in seen_modes:
+                continue
+            rows.append((key[0], key[1], m))
+            seen_modes.add(key)
     return rows
 
 
-def _plot_speed_optmix_cost(ax_time, ax_nodes, rows: List[Tuple[str, str, Dict[str, float]]]) -> None:
+def _plot_speed_optmix_cost(ax, rows: List[Tuple[str, str, Dict[str, float]]]) -> None:
     domains = sorted({d for d, _, _ in rows})
-    mode_order = ["speed", "optimal_mix"]
+    mode_order = ["speed", "mixed"]
     width = 0.34
     x = np.arange(len(domains))
 
-    colors = {"speed": "#1f77b4", "optimal_mix": "#ff7f0e"}
+    colors = {"speed": "#1f77b4", "mixed": "#ff7f0e"}
 
     for i, mode in enumerate(mode_order):
         tvals = []
-        nvals = []
         for d in domains:
             rec = next((r for r in rows if r[0] == d and r[1] == mode), None)
             if rec is None:
                 tvals.append(0.0)
-                nvals.append(0.0)
             else:
                 stats = rec[2]
                 tvals.append(float(stats.get("total_time_s", 0.0)))
-                nvals.append(float(stats.get("total_nodes", 0.0)))
 
         offs = x + (i - 0.5) * width
-        ax_time.bar(offs, tvals, width=width, color=colors[mode], label=mode)
-        ax_nodes.bar(offs, nvals, width=width, color=colors[mode], label=mode)
+        ax.bar(offs, tvals, width=width, color=colors[mode], label=mode)
 
-    ax_time.set_title("Total runtime by heuristic mode")
-    ax_time.set_xticks(x)
-    ax_time.set_xticklabels(domains)
-    ax_time.set_ylabel("seconds")
-    ax_time.grid(axis="y", alpha=0.25)
-    ax_time.legend(frameon=True, fontsize=9)
-
-    ax_nodes.set_title("Total expanded nodes by heuristic mode")
-    ax_nodes.set_xticks(x)
-    ax_nodes.set_xticklabels(domains)
-    ax_nodes.set_ylabel("expanded nodes")
-    ax_nodes.grid(axis="y", alpha=0.25)
-    ax_nodes.ticklabel_format(style="plain", axis="y")
-    ax_nodes.legend(frameon=True, fontsize=9)
+    ax.set_title("Total runtime by heuristic mode")
+    ax.set_xticks(x)
+    ax.set_xticklabels(domains)
+    ax.set_ylabel("seconds")
+    ax.grid(axis="y", alpha=0.25)
+    ax.legend(frameon=True, fontsize=9)
 
 
 def _plot_fallback_composition(ax, rows: List[Tuple[str, str, Dict[str, float]]]) -> None:
@@ -107,7 +113,7 @@ def _plot_fallback_composition(ax, rows: List[Tuple[str, str, Dict[str, float]]]
     def _k(b: Dict[str, float]) -> Tuple[int, int]:
         label = str(b["label"])
         is_group = 1 if "cluster" in label else 0
-        is_opt = 1 if "optimal_mix" in label else 0
+        is_opt = 1 if "mixed" in label else 0
         return (is_group, is_opt)
 
     bars.sort(key=_k)
@@ -128,7 +134,7 @@ def _plot_fallback_composition(ax, rows: List[Tuple[str, str, Dict[str, float]]]
     ax.bar(x, p_glt, bottom=p_hlt, color="#d62728", label="GNN < Hungarian")
     ax.bar(x, p_eq, bottom=p_hlt + p_glt, color="#7f7f7f", label="equal")
 
-    ax.set_title("Fallback rate of optimal_mix")
+    ax.set_title("Fallback rate of mixed")
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     ax.set_ylabel("share of comparable states (%)")
@@ -138,23 +144,37 @@ def _plot_fallback_composition(ax, rows: List[Tuple[str, str, Dict[str, float]]]
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Plot speed vs optimal_mix summary charts.")
-    ap.add_argument("--summary_json", default="results/search_modes/summary.json")
-    ap.add_argument("--out", default="results/search_modes/search_modes_plots.png")
+    ap = argparse.ArgumentParser(description="Plot speed vs mixed summary charts.")
+    ap.add_argument(
+        "--summary_json",
+        nargs=2,
+        default=[
+            "results/evaluate/boxoban/search_modes/summary.json",
+            "results/evaluate/letslogic/static_clusters/search_modes_group_001/summary.json",
+        ],
+        metavar=("SUMMARY1", "SUMMARY2"),
+        help="Paths to two summary JSON files.",
+    )
+    ap.add_argument("--out", default="results/plots/hyperparameters/search_modes_plots.png")
     args = ap.parse_args()
 
-    summary_path = Path(args.summary_json)
+    if len(args.summary_json) != 2:
+        raise SystemExit("Expected exactly two summary JSON paths.")
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    summary = _load_summary(summary_path)
-    rows = _extract_cost_rows(summary)
-    if not rows:
-        raise SystemExit(f"No domain/mode rows parsed from: {summary_path}")
+    rows: List[Tuple[str, str, Dict[str, float]]] = []
+    for summary_path in map(Path, args.summary_json):
+        rows.extend(_extract_cost_rows(_load_summary(summary_path)))
 
-    fig, axes = plt.subplots(1, 3, figsize=(20, 5))
-    _plot_speed_optmix_cost(axes[0], axes[1], rows)
-    _plot_fallback_composition(axes[2], rows)
+    if not rows:
+        raise SystemExit(
+            f"No domain/mode rows parsed from: {args.summary_json}"
+        )
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    _plot_speed_optmix_cost(axes[0], rows)
+    _plot_fallback_composition(axes[1], rows)
 
     fig.tight_layout()
     fig.savefig(out_path, dpi=180)

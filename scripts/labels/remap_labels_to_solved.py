@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 def main():
     p = argparse.ArgumentParser(description="Remap label level_ids from filtered to solved paths using meta info.")
-    p.add_argument("--meta_dir", default="sokoban_core/levels/letslogic_solved/meta", help="Directory with mapping JSONs")
+    p.add_argument("--meta_dir", default="sokoban_core/levels/letslogic/solved/meta", help="Directory with mapping JSONs")
     p.add_argument("--labels_in", default="data/packs_offpolicy_labels_festival", help="Original labels directory")
     p.add_argument("--labels_out", default="data/packs_offpolicy_labels_festival_solved", help="Output directory for remapped labels")
     args = p.parse_args()

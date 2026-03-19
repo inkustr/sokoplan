@@ -20,7 +20,7 @@ else
 fi
 
 # Must have a `lists/` subdir.
-PACKS_DIR="${PACKS_DIR:-sokoban_core/levels/letslogic_filtered}"
+PACKS_DIR="${PACKS_DIR:-sokoban_core/levels/letslogic/filtered}"
 LISTS_DIR="${LISTS_DIR:-${PACKS_DIR}/lists}"
 
 OUT_DIR="${OUT_DIR:-data/packs_offpolicy_labels_festival}"

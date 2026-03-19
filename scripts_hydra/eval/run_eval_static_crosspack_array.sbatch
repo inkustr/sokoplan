@@ -4,8 +4,8 @@
 #SBATCH --error=logs/eval_static_cross_%A_%a.err
 #SBATCH --partition=cpu-2d
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=64
-#SBATCH --mem=96G
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
 #SBATCH --time=2-00:00:00
 #SBATCH --exclusive
 #SBATCH --array=0-14
@@ -22,14 +22,14 @@ cd "$ROOT_DIR"
 mkdir -p logs
 source .venv/bin/activate
 
-TEST_LISTS_DIR="${TEST_LISTS_DIR:-$ROOT_DIR/sokoban_core/levels/splits/pack_groups_transferability_driven_final/test}"
-MODELS_DIR="${MODELS_DIR:-$ROOT_DIR/artifacts/transferability_final_groups_models_test}"
+TEST_LISTS_DIR="${TEST_LISTS_DIR:-$ROOT_DIR/sokoban_core/levels/splits/letslogic/clusters_transferability_driven/test}"
+MODELS_DIR="${MODELS_DIR:-$ROOT_DIR/artifacts/letslogic/transferability_driven}"
 OUT_DIR="${OUT_DIR:-$ROOT_DIR/results/evaluate_transferability_features_final_test/static_crosspack/raw}"
 MODE="${MODE:-speed}"
-TIME_LIMIT="${TIME_LIMIT:-300}"
+TIME_LIMIT="${TIME_LIMIT:-600}"
 NODE_LIMIT="${NODE_LIMIT:-2000000}"
-GNN_JOBS="${GNN_JOBS:-32}"
-HUNGARIAN_JOBS="${HUNGARIAN_JOBS:-32}"
+GNN_JOBS="${GNN_JOBS:-1}"
+HUNGARIAN_JOBS="${HUNGARIAN_JOBS:-1}"
 GENERAL_MODEL="${GENERAL_MODEL:-$ROOT_DIR/artifacts/letslogic/single_model/letslogic_single.pt}"
 INCLUDE_SELF="${INCLUDE_SELF:-1}"  # 0 -> evaluate only other packs, 1 -> include own model
 SKIP_EXISTING="${SKIP_EXISTING:-1}"
@@ -67,7 +67,7 @@ if [ ! -f "$GENERAL_MODEL" ]; then
   echo "ERROR: general checkpoint not found: $GENERAL_MODEL"
   exit 1
 fi
-if [ "$SKIP_EXISTING" = "1" ] && [ -s "$GENERAL_GNN_OUT" ]; then
+if [ "$SKIP_EXISTING" = "1" ] && [ -f "$GENERAL_GNN_OUT" ]; then
   echo "[SKIP] general gnn already exists: $GENERAL_GNN_OUT"
 else
   echo "[RUN] target=$TARGET_GROUP model=general -> $GENERAL_GNN_OUT"
@@ -82,7 +82,7 @@ else
 fi
 
 GENERAL_HUNGARIAN_OUT="$GENERAL_HUNGARIAN_DIR/${TARGET_GROUP}.csv"
-if [ "$SKIP_EXISTING" = "1" ] && [ -s "$GENERAL_HUNGARIAN_OUT" ]; then
+if [ "$SKIP_EXISTING" = "1" ] && [ -f "$GENERAL_HUNGARIAN_OUT" ]; then
   echo "[SKIP] hungarian already exists: $GENERAL_HUNGARIAN_OUT"
 else
   echo "[RUN] target=$TARGET_GROUP model=hungarian+dl -> $GENERAL_HUNGARIAN_OUT"
@@ -105,7 +105,7 @@ for CKPT_PATH in "$MODELS_DIR"/group_*.pt; do
 
   OUT_FILE="$TARGET_OUT_DIR/model_${MODEL_GROUP}.csv"
 
-  if [ "$SKIP_EXISTING" = "1" ] && [ -s "$OUT_FILE" ]; then
+  if [ "$SKIP_EXISTING" = "1" ] && [ -f "$OUT_FILE" ]; then
     echo "[SKIP] already exists: $OUT_FILE"
     continue
   fi
