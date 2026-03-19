@@ -3,4 +3,3 @@
 *.pyo
 .git/
 .pytest_cache/
-__old_labels/
